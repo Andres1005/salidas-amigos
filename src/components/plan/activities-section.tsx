@@ -27,49 +27,56 @@ function ActivityRow({
   const canWithdraw = isPending && activity.proposed_by === currentPersonId && !isAdmin;
 
   return (
-    <li className="flex items-center justify-between gap-3 rounded-2xl bg-surface-muted/70 px-4 py-3">
-      <div>
-        <div className="flex items-center gap-2">
-          <p className="text-sm font-bold">{activity.name}</p>
-          {isPending && <Badge tone="sun">Pendiente de aprobación</Badge>}
+    <li className="flex flex-col gap-3 rounded-2xl bg-surface-muted/70 p-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex items-start gap-3">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-100 text-lg">
+          🎯
+        </span>
+        <div>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="text-sm font-bold">{activity.name}</p>
+            {isPending && <Badge tone="sun">Pendiente</Badge>}
+          </div>
+          <p className="text-xs text-ink-soft">
+            {formatDate(activity.activity_date)}
+            {activity.estimated_cost_cop ? ` · Estimado ${formatCOP(activity.estimated_cost_cop)}` : ""}
+          </p>
         </div>
-        <p className="text-xs text-ink-soft">
-          {formatDate(activity.activity_date)}
-          {activity.estimated_cost_cop ? ` · Estimado ${formatCOP(activity.estimated_cost_cop)}` : ""}
-        </p>
       </div>
-      <div className="flex items-center gap-2">
+
+      <div className="flex flex-wrap items-center gap-3 pl-[52px] sm:pl-0">
         {activity.responsible_name && (
-          <div className="flex items-center gap-1.5" title={`Responsable: ${activity.responsible_name}`}>
+          <div className="flex items-center gap-1.5">
             <Avatar name={activity.responsible_name} size="sm" />
+            <span className="text-xs text-ink-soft">{activity.responsible_name}</span>
           </div>
         )}
-        {isAdmin && isPending && (
-          <form action={approveActivity}>
-            <input type="hidden" name="activityId" value={activity.id} />
-            <input type="hidden" name="planId" value={planId} />
-            <button
-              type="submit"
-              className="text-xs font-semibold text-primary-600 hover:text-primary-800"
-            >
-              Aprobar
-            </button>
-          </form>
-        )}
-        {(isAdmin || canWithdraw) && (
-          <form action={deleteActivity}>
-            <input type="hidden" name="activityId" value={activity.id} />
-            <input type="hidden" name="planId" value={planId} />
-            <ConfirmSubmit
-              message={
-                canWithdraw ? "¿Retirar tu propuesta?" : "¿Eliminar esta actividad?"
-              }
-              className="text-xs font-semibold text-coral-500 hover:text-coral-700"
-            >
-              {canWithdraw ? "Retirar" : "Eliminar"}
-            </ConfirmSubmit>
-          </form>
-        )}
+        <div className="ml-auto flex items-center gap-3 sm:ml-0">
+          {isAdmin && isPending && (
+            <form action={approveActivity}>
+              <input type="hidden" name="activityId" value={activity.id} />
+              <input type="hidden" name="planId" value={planId} />
+              <button
+                type="submit"
+                className="text-xs font-semibold text-primary-600 hover:text-primary-800"
+              >
+                Aprobar
+              </button>
+            </form>
+          )}
+          {(isAdmin || canWithdraw) && (
+            <form action={deleteActivity}>
+              <input type="hidden" name="activityId" value={activity.id} />
+              <input type="hidden" name="planId" value={planId} />
+              <ConfirmSubmit
+                message={canWithdraw ? "¿Retirar tu propuesta?" : "¿Eliminar esta actividad?"}
+                className="text-xs font-semibold text-coral-500 hover:text-coral-700"
+              >
+                {canWithdraw ? "Retirar" : "Eliminar"}
+              </ConfirmSubmit>
+            </form>
+          )}
+        </div>
       </div>
     </li>
   );

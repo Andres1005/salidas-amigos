@@ -1,20 +1,18 @@
 import { Card, CardHeader, CardBody } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Avatar } from "@/components/ui/avatar";
 import { ConfirmSubmit } from "@/components/ui/confirm-submit";
 import { ExpenseForm } from "@/components/plan/expense-form";
 import { deleteExpense } from "@/app/actions/gastos";
 import { formatCOP, formatDate } from "@/lib/format";
-import type { Expense } from "@/lib/types";
+import type { Expense, ExpenseCategory } from "@/lib/types";
 
-const CATEGORY_LABEL: Record<string, string> = {
-  alojamiento: "🏨 Alojamiento",
-  transporte: "🚐 Transporte",
-  comida: "🍽️ Comida",
-  actividades: "🎟️ Actividades",
-  entradas: "🎫 Entradas",
-  compras: "🛍️ Compras",
-  otros: "📦 Otros",
+const CATEGORY: Record<ExpenseCategory, { emoji: string; label: string; tone: string }> = {
+  alojamiento: { emoji: "🏨", label: "Alojamiento", tone: "bg-primary-50 text-primary-700" },
+  transporte: { emoji: "🚐", label: "Transporte", tone: "bg-coral-50 text-coral-700" },
+  comida: { emoji: "🍽️", label: "Comida", tone: "bg-sun-50 text-sun-800" },
+  actividades: { emoji: "🎟️", label: "Actividades", tone: "bg-primary-50 text-primary-700" },
+  entradas: { emoji: "🎫", label: "Entradas", tone: "bg-coral-50 text-coral-700" },
+  compras: { emoji: "🛍️", label: "Compras", tone: "bg-sun-50 text-sun-800" },
+  otros: { emoji: "📦", label: "Otros", tone: "bg-ink/5 text-ink-soft" },
 };
 
 interface ExpenseWithPayer extends Expense {
@@ -49,38 +47,48 @@ export function ExpensesSection({
           </p>
         ) : (
           <ul className="space-y-2">
-            {expenses.map((expense) => (
-              <li
-                key={expense.id}
-                className="flex items-center justify-between gap-3 rounded-2xl bg-surface-muted/70 px-4 py-3"
-              >
-                <div className="flex items-center gap-3">
-                  <Avatar name={expense.paid_by_name} size="sm" />
-                  <div>
-                    <p className="text-sm font-bold">{expense.description}</p>
-                    <p className="text-xs text-ink-soft">
-                      {expense.paid_by_name} · {formatDate(expense.expense_date)}
-                    </p>
+            {expenses.map((expense) => {
+              const category = CATEGORY[expense.category];
+              return (
+                <li
+                  key={expense.id}
+                  className="flex flex-col gap-3 rounded-2xl bg-surface-muted/70 p-4 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div className="flex items-start gap-3">
+                    <span
+                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-lg ${category.tone}`}
+                    >
+                      {category.emoji}
+                    </span>
+                    <div>
+                      <p className="text-sm font-bold">{expense.description}</p>
+                      <p className="mt-0.5 text-xs text-ink-soft">
+                        Pagó <span className="font-semibold">{expense.paid_by_name}</span> ·{" "}
+                        {formatDate(expense.expense_date)} · {category.label}
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Badge tone="neutral">{CATEGORY_LABEL[expense.category]}</Badge>
-                  <span className="text-sm font-extrabold">{formatCOP(expense.amount_cop)}</span>
-                  {isAdmin && (
-                    <form action={deleteExpense}>
-                      <input type="hidden" name="expenseId" value={expense.id} />
-                      <input type="hidden" name="planId" value={planId} />
-                      <ConfirmSubmit
-                        message="¿Eliminar este gasto?"
-                        className="text-xs font-semibold text-coral-500 hover:text-coral-700"
-                      >
-                        Eliminar
-                      </ConfirmSubmit>
-                    </form>
-                  )}
-                </div>
-              </li>
-            ))}
+
+                  <div className="flex items-center justify-between gap-3 pl-[52px] sm:justify-end sm:pl-0">
+                    <span className="text-base font-extrabold text-ink">
+                      {formatCOP(expense.amount_cop)}
+                    </span>
+                    {isAdmin && (
+                      <form action={deleteExpense}>
+                        <input type="hidden" name="expenseId" value={expense.id} />
+                        <input type="hidden" name="planId" value={planId} />
+                        <ConfirmSubmit
+                          message="¿Eliminar este gasto?"
+                          className="text-xs font-semibold text-coral-500 hover:text-coral-700"
+                        >
+                          Eliminar
+                        </ConfirmSubmit>
+                      </form>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         )}
 

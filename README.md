@@ -1,36 +1,41 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Salidas Amigos
 
-## Getting Started
+App para administrar salidas, planes y gastos con amigos: gestiona personas, planes, actividades y responsables, registra gastos en pesos colombianos y, al cerrar un plan, calcula automáticamente quién le debe a quién (con el menor número de transferencias posible).
 
-First, run the development server:
+Acceso cerrado: solo las personas que el admin agrega manualmente pueden crear una cuenta, usando un código de invitación único.
+
+## Stack
+
+- [Next.js 16](https://nextjs.org) (App Router, Server Actions)
+- [Supabase](https://supabase.com) (Postgres + Auth, con Row Level Security)
+- Tailwind CSS v4 + [Framer Motion](https://motion.dev)
+
+## Configurar Supabase
+
+1. Crea un proyecto en [supabase.com](https://supabase.com).
+2. En **SQL Editor**, ejecuta en orden los archivos de `supabase/migrations/`:
+   - `0001_init.sql` — esquema (personas, planes, participantes, actividades, gastos, liquidaciones) y RLS.
+   - `0002_seed_admin.sql` — crea tu fila de persona admin (ajusta el correo si lo necesitas antes de ejecutar).
+3. Copia `.env.local.example` a `.env.local` y completa las tres variables con los valores de **Project Settings → API** de tu proyecto.
+4. Obtén tu código de invitación de admin con:
+   ```sql
+   select full_name, email, invite_code from public.people where role = 'admin';
+   ```
+5. Ve a `/registro`, canjea ese código con tu correo y activa tu cuenta.
+
+## Desarrollo local
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abre [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Flujo general
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. El admin agrega personas en `/admin/personas` y comparte el código de invitación de cada una.
+2. Cada persona activa su cuenta en `/registro` con ese código.
+3. El admin crea planes en `/admin/planes/nuevo` y selecciona quiénes participan.
+4. Cualquier participante registra gastos dentro del plan (`/planes/[id]`); el admin gestiona actividades, responsables y el peso de reparto de cada participante (para invitados u homenajeados que no pagan).
+5. Al cerrar el plan, se calcula la liquidación final en COP y queda guardada como historial.

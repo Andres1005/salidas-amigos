@@ -1,26 +1,135 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-surface: #fffdf8;
+  --color-surface-muted: #fff4e6;
+  --color-ink: #0b2b33;
+  --color-ink-soft: #35606b;
+
+  /* Turquoise - primary */
+  --color-primary-50: #eafffb;
+  --color-primary-100: #ccfff5;
+  --color-primary-200: #96fbec;
+  --color-primary-300: #57ebdd;
+  --color-primary-400: #21cfc4;
+  --color-primary-500: #0aada8;
+  --color-primary-600: #048a8a;
+  --color-primary-700: #086e70;
+  --color-primary-800: #0d575a;
+  --color-primary-900: #0f484c;
+
+  /* Coral - secondary */
+  --color-coral-50: #fff1ee;
+  --color-coral-100: #ffe1da;
+  --color-coral-200: #ffc0b0;
+  --color-coral-300: #ff9880;
+  --color-coral-400: #ff6f50;
+  --color-coral-500: #fa4a29;
+  --color-coral-600: #e5321a;
+  --color-coral-700: #bd2716;
+  --color-coral-800: #98221a;
+  --color-coral-900: #7b2019;
+
+  /* Sun - accent */
+  --color-sun-50: #fffbe6;
+  --color-sun-100: #fff3b8;
+  --color-sun-200: #ffe676;
+  --color-sun-300: #ffd23f;
+  --color-sun-400: #ffbe12;
+  --color-sun-500: #f9a300;
+  --color-sun-600: #d67e00;
+  --color-sun-700: #a85e04;
+  --color-sun-800: #874b0c;
+  --color-sun-900: #6f3f10;
+
+  /* Deep sea - dark UI accents / footers */
+  --color-deep-500: #0f4c5c;
+  --color-deep-600: #0b3a47;
+  --color-deep-700: #082c37;
+  --color-deep-800: #062028;
+  --color-deep-900: #04161c;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-surface: var(--color-surface);
+  --color-surface-muted: var(--color-surface-muted);
+  --color-ink: var(--color-ink);
+  --color-ink-soft: var(--color-ink-soft);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-primary-50: var(--color-primary-50);
+  --color-primary-100: var(--color-primary-100);
+  --color-primary-200: var(--color-primary-200);
+  --color-primary-300: var(--color-primary-300);
+  --color-primary-400: var(--color-primary-400);
+  --color-primary-500: var(--color-primary-500);
+  --color-primary-600: var(--color-primary-600);
+  --color-primary-700: var(--color-primary-700);
+  --color-primary-800: var(--color-primary-800);
+  --color-primary-900: var(--color-primary-900);
+
+  --color-coral-50: var(--color-coral-50);
+  --color-coral-100: var(--color-coral-100);
+  --color-coral-200: var(--color-coral-200);
+  --color-coral-300: var(--color-coral-300);
+  --color-coral-400: var(--color-coral-400);
+  --color-coral-500: var(--color-coral-500);
+  --color-coral-600: var(--color-coral-600);
+  --color-coral-700: var(--color-coral-700);
+  --color-coral-800: var(--color-coral-800);
+  --color-coral-900: var(--color-coral-900);
+
+  --color-sun-50: var(--color-sun-50);
+  --color-sun-100: var(--color-sun-100);
+  --color-sun-200: var(--color-sun-200);
+  --color-sun-300: var(--color-sun-300);
+  --color-sun-400: var(--color-sun-400);
+  --color-sun-500: var(--color-sun-500);
+  --color-sun-600: var(--color-sun-600);
+  --color-sun-700: var(--color-sun-700);
+  --color-sun-800: var(--color-sun-800);
+  --color-sun-900: var(--color-sun-900);
+
+  --color-deep-500: var(--color-deep-500);
+  --color-deep-600: var(--color-deep-600);
+  --color-deep-700: var(--color-deep-700);
+  --color-deep-800: var(--color-deep-800);
+  --color-deep-900: var(--color-deep-900);
+
+  --font-sans: var(--font-jakarta);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-surface);
+  color: var(--color-ink);
+}
+
+@layer utilities {
+  .bg-wave {
+    background-image: radial-gradient(
+        circle at 15% 20%,
+        color-mix(in srgb, var(--color-sun-300) 35%, transparent) 0%,
+        transparent 45%
+      ),
+      radial-gradient(
+        circle at 85% 0%,
+        color-mix(in srgb, var(--color-coral-300) 30%, transparent) 0%,
+        transparent 45%
+      ),
+      radial-gradient(
+        circle at 50% 100%,
+        color-mix(in srgb, var(--color-primary-300) 35%, transparent) 0%,
+        transparent 50%
+      );
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
 }

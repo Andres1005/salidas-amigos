@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { requireAdmin, requirePerson } from "@/lib/dal";
 import { createClient } from "@/lib/supabase/server";
 import { generateInviteCode } from "@/lib/invite-code";
+import { resolvePreset } from "@/lib/participant-presets";
 import type { ActionState } from "@/app/actions/personas";
 
 const planSchema = z.object({
@@ -62,8 +63,7 @@ export async function createPlan(
     if (data) {
       plan = data;
     } else if (!(error?.code === "23505" && error.message.includes("join_code"))) {
-      // TODO: revertir a mensaje genérico una vez diagnosticado el error real.
-      return { error: `No se pudo crear el plan: ${error?.message ?? "error desconocido"}` };
+      return { error: "No se pudo crear el plan." };
     }
   }
 
@@ -139,10 +139,11 @@ export async function updateParticipantShare(formData: FormData) {
 
   const participantId = formData.get("participantId") as string;
   const planId = formData.get("planId") as string;
-  const shareWeight = Number(formData.get("shareWeight"));
-  const roleLabel = (formData.get("roleLabel") as string) || null;
+  const preset = formData.get("preset") as string;
 
-  if (!participantId || Number.isNaN(shareWeight) || shareWeight < 0) return;
+  if (!participantId || !preset) return;
+
+  const { roleLabel, shareWeight } = resolvePreset(preset);
 
   await supabase
     .from("sa_plan_participants")

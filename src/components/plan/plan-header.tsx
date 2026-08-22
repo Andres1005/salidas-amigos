@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { closePlan, reopenPlan } from "@/app/actions/cierre";
 import { JoinCodeBadge } from "@/components/plan/join-code-badge";
+import { SharePlanButton } from "@/components/plan/share-plan-button";
 import { formatDate } from "@/lib/format";
 import type { Plan } from "@/lib/types";
 
@@ -33,7 +34,12 @@ export function PlanHeader({ plan, isAdmin }: { plan: Plan; isAdmin: boolean }) 
             {isOpen ? "🟢 Plan abierto" : "🔒 Plan cerrado"}
           </Badge>
 
-          {isOpen && <JoinCodeBadge code={plan.join_code} />}
+          {isOpen && (
+            <div className="flex flex-wrap justify-end gap-2">
+              <JoinCodeBadge code={plan.join_code} />
+              <SharePlanButton planName={plan.name} code={plan.join_code} />
+            </div>
+          )}
 
           {isAdmin && (
             <form action={isOpen ? closePlan : reopenPlan}>

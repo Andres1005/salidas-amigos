@@ -1,13 +1,15 @@
 import { Card, CardHeader, CardBody } from "@/components/ui/card";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Input, Select } from "@/components/ui/field";
+import { Select } from "@/components/ui/field";
 import { ConfirmSubmit } from "@/components/ui/confirm-submit";
+import { ParticipantPresetSelect } from "@/components/plan/participant-preset-select";
 import {
   updateParticipantShare,
   removeParticipant,
   addParticipant,
 } from "@/app/actions/planes";
+import { presetFor } from "@/lib/participant-presets";
 import type { PlanParticipant, Person } from "@/lib/types";
 
 interface ParticipantWithPerson extends PlanParticipant {
@@ -28,9 +30,9 @@ export function ParticipantsSection({
       <CardHeader>
         <h2 className="font-bold">Participantes y reparto</h2>
         <p className="text-sm text-ink-soft">
-          El peso controla cuánto le corresponde a cada quien. Usa 0 para
-          invitados u homenajeados que no pagan, o un número distinto de 1
-          para ajustar el reparto.
+          Elige cómo se le divide el gasto a cada quien. Por defecto todos
+          pagan su parte igual; marca homenajeado/a o invitado especial para
+          que no les toque pagar.
         </p>
       </CardHeader>
       <CardBody className="space-y-3">
@@ -46,28 +48,9 @@ export function ParticipantsSection({
             <Avatar name={participant.person.full_name} size="sm" />
             <span className="min-w-[9rem] text-sm font-bold">{participant.person.full_name}</span>
 
-            <Input
-              name="roleLabel"
-              defaultValue={participant.role_label ?? ""}
-              placeholder="Ej. Homenajeado"
-              className="h-9 w-40 text-xs"
+            <ParticipantPresetSelect
+              defaultValue={presetFor(participant.role_label, Number(participant.share_weight))}
             />
-
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs font-semibold text-ink-soft">Peso</span>
-              <Input
-                name="shareWeight"
-                type="number"
-                min="0"
-                step="0.5"
-                defaultValue={participant.share_weight}
-                className="h-9 w-20 text-xs"
-              />
-            </div>
-
-            <Button type="submit" size="sm" variant="outline">
-              Guardar
-            </Button>
 
             <ConfirmSubmit
               message={`¿Quitar a ${participant.person.full_name} de este plan?`}

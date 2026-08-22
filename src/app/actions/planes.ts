@@ -62,7 +62,8 @@ export async function createPlan(
     if (data) {
       plan = data;
     } else if (!(error?.code === "23505" && error.message.includes("join_code"))) {
-      return { error: "No se pudo crear el plan." };
+      // TODO: revertir a mensaje genérico una vez diagnosticado el error real.
+      return { error: `No se pudo crear el plan: ${error?.message ?? "error desconocido"}` };
     }
   }
 

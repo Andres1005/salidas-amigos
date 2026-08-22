@@ -131,7 +131,8 @@ export async function redeemInvite(
 
     authUserId = existingUser.id;
   } else {
-    return { error: "No pudimos crear tu cuenta. Intenta de nuevo." };
+    // TODO: revertir a mensaje genérico una vez diagnosticado el error real.
+    return { error: `No pudimos crear tu cuenta: ${createError?.message ?? "error desconocido"}` };
   }
 
   const { error: updateError } = await admin

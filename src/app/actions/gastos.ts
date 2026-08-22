@@ -48,7 +48,7 @@ export async function createExpense(
     return { error: parsed.error.issues[0]?.message ?? "Datos inválidos." };
   }
 
-  const { error } = await supabase.from("expenses").insert({
+  const { error } = await supabase.from("sa_expenses").insert({
     plan_id: parsed.data.planId,
     description: parsed.data.description,
     amount_cop: parsed.data.amountCop,
@@ -74,6 +74,6 @@ export async function deleteExpense(formData: FormData) {
   const expenseId = formData.get("expenseId") as string;
   const planId = formData.get("planId") as string;
 
-  await supabase.from("expenses").delete().eq("id", expenseId);
+  await supabase.from("sa_expenses").delete().eq("id", expenseId);
   revalidatePath(`/planes/${planId}`);
 }

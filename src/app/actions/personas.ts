@@ -34,7 +34,7 @@ export async function createPerson(
   const supabase = await createClient();
 
   for (let attempt = 0; attempt < 5; attempt++) {
-    const { error } = await supabase.from("people").insert({
+    const { error } = await supabase.from("sa_people").insert({
       full_name: parsed.data.fullName,
       email: parsed.data.email,
       invite_code: generateInviteCode(),
@@ -65,7 +65,7 @@ export async function regenerateInviteCode(personId: string): Promise<ActionStat
 
   for (let attempt = 0; attempt < 5; attempt++) {
     const { error } = await supabase
-      .from("people")
+      .from("sa_people")
       .update({ invite_code: generateInviteCode() })
       .eq("id", personId)
       .eq("invite_status", "pendiente");
@@ -86,7 +86,7 @@ export async function deletePerson(personId: string): Promise<ActionState> {
   await requireAdmin();
   const supabase = await createClient();
 
-  const { error } = await supabase.from("people").delete().eq("id", personId);
+  const { error } = await supabase.from("sa_people").delete().eq("id", personId);
 
   if (error) {
     return {

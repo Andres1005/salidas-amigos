@@ -28,7 +28,7 @@ export default async function PlanDetailPage({
   const supabase = await createClient();
 
   const { data: plan } = await supabase
-    .from("plans")
+    .from("sa_plans")
     .select("*")
     .eq("id", id)
     .maybeSingle();
@@ -43,22 +43,22 @@ export default async function PlanDetailPage({
     { data: allPeople },
   ] = await Promise.all([
     supabase
-      .from("plan_participants")
-      .select("*, person:people(id, full_name)")
+      .from("sa_plan_participants")
+      .select("*, person:sa_people(id, full_name)")
       .eq("plan_id", id)
       .order("created_at", { ascending: true }),
     supabase
-      .from("activities")
+      .from("sa_activities")
       .select("*")
       .eq("plan_id", id)
       .order("activity_date", { ascending: true }),
     supabase
-      .from("expenses")
+      .from("sa_expenses")
       .select("*")
       .eq("plan_id", id)
       .order("expense_date", { ascending: false }),
-    supabase.from("settlements").select("*").eq("plan_id", id),
-    supabase.from("people").select("*").order("full_name", { ascending: true }),
+    supabase.from("sa_settlements").select("*").eq("plan_id", id),
+    supabase.from("sa_people").select("*").order("full_name", { ascending: true }),
   ]);
 
   const typedPlan = plan as Plan;

@@ -11,7 +11,7 @@ export default async function PanelPage() {
   const supabase = await createClient();
 
   const { data: plans } = await supabase
-    .from("plans")
+    .from("sa_plans")
     .select("*")
     .order("created_at", { ascending: false });
 
@@ -19,10 +19,10 @@ export default async function PanelPage() {
 
   const [{ data: expenses }, { data: participants }] = await Promise.all([
     planIds.length
-      ? supabase.from("expenses").select("plan_id, amount_cop").in("plan_id", planIds)
+      ? supabase.from("sa_expenses").select("plan_id, amount_cop").in("plan_id", planIds)
       : Promise.resolve({ data: [] as { plan_id: string; amount_cop: number }[] }),
     planIds.length
-      ? supabase.from("plan_participants").select("plan_id").in("plan_id", planIds)
+      ? supabase.from("sa_plan_participants").select("plan_id").in("plan_id", planIds)
       : Promise.resolve({ data: [] as { plan_id: string }[] }),
   ]);
 

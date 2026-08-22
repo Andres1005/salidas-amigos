@@ -78,7 +78,7 @@ export async function redeemInvite(
   const admin = createAdminClient();
 
   const { data: person, error: lookupError } = await admin
-    .from("people")
+    .from("sa_people")
     .select("id, email, invite_status, auth_user_id")
     .eq("invite_code", inviteCode)
     .maybeSingle();
@@ -97,28 +97,50 @@ export async function redeemInvite(
     };
   }
 
+  let authUserId: string;
+
   const { data: created, error: createError } = await admin.auth.admin.createUser({
     email,
     password,
     email_confirm: true,
   });
 
-  if (createError || !created.user) {
-    return {
-      error:
-        createError?.message === "User already registered"
-          ? "Ya existe una cuenta con ese correo. Inicia sesión."
-          : "No pudimos crear tu cuenta. Intenta de nuevo.",
-    };
+  if (created.user) {
+    authUserId = created.user.id;
+  } else if (createError?.message === "User already registered") {
+    // Este proyecto de Supabase también sirve otra app: la persona puede ya
+    // tener un usuario de Auth por ese lado. Lo reutilizamos en vez de
+    // fallar, fijando la contraseña que acaba de elegir aquí.
+    const { data: existing } = await admin.auth.admin.listUsers({ perPage: 1000 });
+    const existingUser = existing?.users.find(
+      (u) => u.email?.toLowerCase() === email
+    );
+
+    if (!existingUser) {
+      return { error: "No pudimos activar tu cuenta. Intenta de nuevo." };
+    }
+
+    const { error: updatePasswordError } = await admin.auth.admin.updateUserById(
+      existingUser.id,
+      { password }
+    );
+
+    if (updatePasswordError) {
+      return { error: "No pudimos activar tu cuenta. Intenta de nuevo." };
+    }
+
+    authUserId = existingUser.id;
+  } else {
+    return { error: "No pudimos crear tu cuenta. Intenta de nuevo." };
   }
 
   const { error: updateError } = await admin
-    .from("people")
-    .update({ auth_user_id: created.user.id, invite_status: "canjeada" })
+    .from("sa_people")
+    .update({ auth_user_id: authUserId, invite_status: "canjeada" })
     .eq("id", person.id);
 
   if (updateError) {
-    await admin.auth.admin.deleteUser(created.user.id);
+    if (created.user) await admin.auth.admin.deleteUser(authUserId);
     return { error: "No pudimos activar tu cuenta. Intenta de nuevo." };
   }
 

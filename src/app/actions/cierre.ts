@@ -13,10 +13,10 @@ export async function closePlan(formData: FormData) {
 
   const [{ data: participants }, { data: expenses }] = await Promise.all([
     supabase
-      .from("plan_participants")
-      .select("person_id, share_weight, people(full_name)")
+      .from("sa_plan_participants")
+      .select("person_id, share_weight, sa_people(full_name)")
       .eq("plan_id", planId),
-    supabase.from("expenses").select("amount_cop, paid_by_person_id").eq("plan_id", planId),
+    supabase.from("sa_expenses").select("amount_cop, paid_by_person_id").eq("plan_id", planId),
   ]);
 
   if (!participants || participants.length === 0) return;
@@ -32,7 +32,7 @@ export async function closePlan(formData: FormData) {
   const tallies: ParticipantTally[] = participants.map((p) => ({
     personId: p.person_id,
     name:
-      (p as unknown as { people: { full_name: string } | null }).people?.full_name ??
+      (p as unknown as { sa_people: { full_name: string } | null }).sa_people?.full_name ??
       "Sin nombre",
     weight: Number(p.share_weight),
     paid: paidByPerson.get(p.person_id) ?? 0,
@@ -40,10 +40,10 @@ export async function closePlan(formData: FormData) {
 
   const { transfers } = computeSettlement(tallies);
 
-  await supabase.from("settlements").delete().eq("plan_id", planId);
+  await supabase.from("sa_settlements").delete().eq("plan_id", planId);
 
   if (transfers.length > 0) {
-    await supabase.from("settlements").insert(
+    await supabase.from("sa_settlements").insert(
       transfers.map((t) => ({
         plan_id: planId,
         from_person_id: t.fromPersonId,
@@ -54,7 +54,7 @@ export async function closePlan(formData: FormData) {
   }
 
   await supabase
-    .from("plans")
+    .from("sa_plans")
     .update({ status: "cerrado", closed_at: new Date().toISOString() })
     .eq("id", planId);
 
@@ -68,8 +68,8 @@ export async function reopenPlan(formData: FormData) {
   const planId = formData.get("planId") as string;
   if (!planId) return;
 
-  await supabase.from("plans").update({ status: "abierto", closed_at: null }).eq("id", planId);
-  await supabase.from("settlements").delete().eq("plan_id", planId);
+  await supabase.from("sa_plans").update({ status: "abierto", closed_at: null }).eq("id", planId);
+  await supabase.from("sa_settlements").delete().eq("plan_id", planId);
 
   revalidatePath(`/planes/${planId}`);
   revalidatePath("/panel");

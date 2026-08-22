@@ -12,14 +12,29 @@ Acceso cerrado: solo las personas que el admin agrega manualmente pueden crear u
 
 ## Configurar Supabase
 
-1. Crea un proyecto en [supabase.com](https://supabase.com).
+Este proyecto puede vivir en su propio proyecto de Supabase, o **compartir uno
+que ya uses para otra app** (por ejemplo, uno con límite de proyectos en el
+plan gratis). Todas las tablas y funciones usan el prefijo `sa_`
+(`sa_people`, `sa_plans`, `sa_plan_participants`, `sa_activities`,
+`sa_expenses`, `sa_settlements`, `sa_is_admin()`, etc.) precisamente para
+convivir en el esquema `public` sin chocar con las tablas de otra app.
+
+Una cosa que **sí** es compartida entre apps del mismo proyecto: el pool de
+autenticación (`auth.users`). Si alguien ya tiene cuenta ahí por la otra app,
+el flujo de `/registro` reutiliza ese mismo usuario de Auth (le actualiza la
+contraseña) en vez de fallar. Si una cuenta de Auth no tiene una fila
+vinculada en `sa_people`, la app la manda a `/sin-acceso` en vez de dejarla
+entrar — así los datos de ambas apps quedan aislados por RLS aunque
+compartan el proyecto.
+
+1. Crea un proyecto nuevo en [supabase.com](https://supabase.com), o entra al proyecto existente que vayas a reutilizar.
 2. En **SQL Editor**, ejecuta en orden los archivos de `supabase/migrations/`:
-   - `0001_init.sql` — esquema (personas, planes, participantes, actividades, gastos, liquidaciones) y RLS.
+   - `0001_init.sql` — esquema (`sa_people`, `sa_plans`, `sa_plan_participants`, `sa_activities`, `sa_expenses`, `sa_settlements`) y RLS.
    - `0002_seed_admin.sql` — crea tu fila de persona admin (ajusta el correo si lo necesitas antes de ejecutar).
-3. Copia `.env.local.example` a `.env.local` y completa las tres variables con los valores de **Project Settings → API** de tu proyecto.
+3. Copia `.env.local.example` a `.env.local` y completa las tres variables con los valores de **Project Settings → API** de ese proyecto.
 4. Obtén tu código de invitación de admin con:
    ```sql
-   select full_name, email, invite_code from public.people where role = 'admin';
+   select full_name, email, invite_code from public.sa_people where role = 'admin';
    ```
 5. Ve a `/registro`, canjea ese código con tu correo y activa tu cuenta.
 

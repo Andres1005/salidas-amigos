@@ -11,7 +11,7 @@ export default async function NuevoPlanPage() {
   const supabase = await createClient();
 
   const { data: people } = await supabase
-    .from("people")
+    .from("sa_people")
     .select("*")
     .order("full_name", { ascending: true });
 

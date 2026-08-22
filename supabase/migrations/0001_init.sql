@@ -1,13 +1,18 @@
 -- Salidas Amigos — esquema inicial
 -- Personas, planes, participantes, actividades, gastos y liquidaciones.
+--
+-- Todas las tablas y funciones usan el prefijo `sa_` a propósito: este
+-- proyecto de Supabase es compartido con otras apps (p. ej. cadenas de
+-- ahorro), así que el prefijo evita cualquier choque de nombres en el
+-- esquema `public` y deja claro qué pertenece a Salidas Amigos.
 
 create extension if not exists "pgcrypto";
 
 -- ---------------------------------------------------------------------------
--- people: el roster cerrado de amigos administrado por el/la admin.
+-- sa_people: el roster cerrado de amigos administrado por el/la admin.
 -- Solo quien tiene una fila aquí (con invite_code válido) puede crear cuenta.
 -- ---------------------------------------------------------------------------
-create table if not exists public.people (
+create table if not exists public.sa_people (
   id uuid primary key default gen_random_uuid(),
   full_name text not null,
   email text not null unique,
@@ -19,9 +24,9 @@ create table if not exists public.people (
 );
 
 -- ---------------------------------------------------------------------------
--- plans: cada salida/viaje/plan.
+-- sa_plans: cada salida/viaje/plan.
 -- ---------------------------------------------------------------------------
-create table if not exists public.plans (
+create table if not exists public.sa_plans (
   id uuid primary key default gen_random_uuid(),
   name text not null,
   description text,
@@ -31,19 +36,19 @@ create table if not exists public.plans (
   end_date date,
   status text not null default 'abierto' check (status in ('abierto', 'cerrado')),
   split_mode text not null default 'equitativo' check (split_mode in ('equitativo', 'personalizado')),
-  created_by uuid not null references public.people (id),
+  created_by uuid not null references public.sa_people (id),
   closed_at timestamptz,
   created_at timestamptz not null default now()
 );
 
 -- ---------------------------------------------------------------------------
--- plan_participants: quién participa en cada plan y con qué peso se le
+-- sa_plan_participants: quién participa en cada plan y con qué peso se le
 -- divide el gasto (share_weight = 0 para invitados/homenajeados que no pagan).
 -- ---------------------------------------------------------------------------
-create table if not exists public.plan_participants (
+create table if not exists public.sa_plan_participants (
   id uuid primary key default gen_random_uuid(),
-  plan_id uuid not null references public.plans (id) on delete cascade,
-  person_id uuid not null references public.people (id) on delete cascade,
+  plan_id uuid not null references public.sa_plans (id) on delete cascade,
+  person_id uuid not null references public.sa_people (id) on delete cascade,
   share_weight numeric(6, 2) not null default 1 check (share_weight >= 0),
   role_label text,
   created_at timestamptz not null default now(),
@@ -51,69 +56,69 @@ create table if not exists public.plan_participants (
 );
 
 -- ---------------------------------------------------------------------------
--- activities: itinerario del plan, cada una con un responsable.
+-- sa_activities: itinerario del plan, cada una con un responsable.
 -- ---------------------------------------------------------------------------
-create table if not exists public.activities (
+create table if not exists public.sa_activities (
   id uuid primary key default gen_random_uuid(),
-  plan_id uuid not null references public.plans (id) on delete cascade,
+  plan_id uuid not null references public.sa_plans (id) on delete cascade,
   name text not null,
   description text,
   activity_date date,
-  responsible_person_id uuid references public.people (id),
+  responsible_person_id uuid references public.sa_people (id),
   estimated_cost_cop numeric(12, 2),
   created_at timestamptz not null default now()
 );
 
 -- ---------------------------------------------------------------------------
--- expenses: gastos reales, siempre en pesos colombianos.
+-- sa_expenses: gastos reales, siempre en pesos colombianos.
 -- ---------------------------------------------------------------------------
-create table if not exists public.expenses (
+create table if not exists public.sa_expenses (
   id uuid primary key default gen_random_uuid(),
-  plan_id uuid not null references public.plans (id) on delete cascade,
-  activity_id uuid references public.activities (id) on delete set null,
+  plan_id uuid not null references public.sa_plans (id) on delete cascade,
+  activity_id uuid references public.sa_activities (id) on delete set null,
   description text not null,
   category text not null default 'otros' check (
     category in ('alojamiento', 'transporte', 'comida', 'actividades', 'entradas', 'compras', 'otros')
   ),
   amount_cop numeric(12, 2) not null check (amount_cop > 0),
-  paid_by_person_id uuid not null references public.people (id),
-  created_by uuid not null references public.people (id),
+  paid_by_person_id uuid not null references public.sa_people (id),
+  created_by uuid not null references public.sa_people (id),
   expense_date date not null default current_date,
   created_at timestamptz not null default now()
 );
 
 -- ---------------------------------------------------------------------------
--- settlements: liquidación final calculada al cerrar el plan.
+-- sa_settlements: liquidación final calculada al cerrar el plan.
 -- ---------------------------------------------------------------------------
-create table if not exists public.settlements (
+create table if not exists public.sa_settlements (
   id uuid primary key default gen_random_uuid(),
-  plan_id uuid not null references public.plans (id) on delete cascade,
-  from_person_id uuid not null references public.people (id),
-  to_person_id uuid not null references public.people (id),
+  plan_id uuid not null references public.sa_plans (id) on delete cascade,
+  from_person_id uuid not null references public.sa_people (id),
+  to_person_id uuid not null references public.sa_people (id),
   amount_cop numeric(12, 2) not null check (amount_cop > 0),
   created_at timestamptz not null default now()
 );
 
-create index if not exists plan_participants_plan_id_idx on public.plan_participants (plan_id);
-create index if not exists plan_participants_person_id_idx on public.plan_participants (person_id);
-create index if not exists activities_plan_id_idx on public.activities (plan_id);
-create index if not exists expenses_plan_id_idx on public.expenses (plan_id);
-create index if not exists settlements_plan_id_idx on public.settlements (plan_id);
+create index if not exists sa_plan_participants_plan_id_idx on public.sa_plan_participants (plan_id);
+create index if not exists sa_plan_participants_person_id_idx on public.sa_plan_participants (person_id);
+create index if not exists sa_activities_plan_id_idx on public.sa_activities (plan_id);
+create index if not exists sa_expenses_plan_id_idx on public.sa_expenses (plan_id);
+create index if not exists sa_settlements_plan_id_idx on public.sa_settlements (plan_id);
 
 -- ---------------------------------------------------------------------------
 -- Helpers de autorización (security definer para evitar recursión de RLS)
 -- ---------------------------------------------------------------------------
-create or replace function public.current_person_id()
+create or replace function public.sa_current_person_id()
 returns uuid
 language sql
 security definer
 set search_path = public
 stable
 as $$
-  select id from public.people where auth_user_id = auth.uid();
+  select id from public.sa_people where auth_user_id = auth.uid();
 $$;
 
-create or replace function public.is_admin()
+create or replace function public.sa_is_admin()
 returns boolean
 language sql
 security definer
@@ -121,12 +126,12 @@ set search_path = public
 stable
 as $$
   select coalesce(
-    (select role = 'admin' from public.people where auth_user_id = auth.uid()),
+    (select role = 'admin' from public.sa_people where auth_user_id = auth.uid()),
     false
   );
 $$;
 
-create or replace function public.is_plan_participant(target_plan_id uuid)
+create or replace function public.sa_is_plan_participant(target_plan_id uuid)
 returns boolean
 language sql
 security definer
@@ -134,69 +139,69 @@ set search_path = public
 stable
 as $$
   select exists (
-    select 1 from public.plan_participants
-    where plan_id = target_plan_id and person_id = public.current_person_id()
+    select 1 from public.sa_plan_participants
+    where plan_id = target_plan_id and person_id = public.sa_current_person_id()
   );
 $$;
 
 -- ---------------------------------------------------------------------------
 -- RLS
 -- ---------------------------------------------------------------------------
-alter table public.people enable row level security;
-alter table public.plans enable row level security;
-alter table public.plan_participants enable row level security;
-alter table public.activities enable row level security;
-alter table public.expenses enable row level security;
-alter table public.settlements enable row level security;
+alter table public.sa_people enable row level security;
+alter table public.sa_plans enable row level security;
+alter table public.sa_plan_participants enable row level security;
+alter table public.sa_activities enable row level security;
+alter table public.sa_expenses enable row level security;
+alter table public.sa_settlements enable row level security;
 
--- people
-create policy "people_select_self_or_admin" on public.people
-  for select using (auth_user_id = auth.uid() or public.is_admin());
+-- sa_people
+create policy "sa_people_select_self_or_admin" on public.sa_people
+  for select using (auth_user_id = auth.uid() or public.sa_is_admin());
 
-create policy "people_admin_write" on public.people
-  for all using (public.is_admin()) with check (public.is_admin());
+create policy "sa_people_admin_write" on public.sa_people
+  for all using (public.sa_is_admin()) with check (public.sa_is_admin());
 
--- plans
-create policy "plans_select_participant_or_admin" on public.plans
-  for select using (public.is_plan_participant(id) or public.is_admin());
+-- sa_plans
+create policy "sa_plans_select_participant_or_admin" on public.sa_plans
+  for select using (public.sa_is_plan_participant(id) or public.sa_is_admin());
 
-create policy "plans_admin_write" on public.plans
-  for all using (public.is_admin()) with check (public.is_admin());
+create policy "sa_plans_admin_write" on public.sa_plans
+  for all using (public.sa_is_admin()) with check (public.sa_is_admin());
 
--- plan_participants
-create policy "plan_participants_select_participant_or_admin" on public.plan_participants
-  for select using (public.is_plan_participant(plan_id) or public.is_admin());
+-- sa_plan_participants
+create policy "sa_plan_participants_select_participant_or_admin" on public.sa_plan_participants
+  for select using (public.sa_is_plan_participant(plan_id) or public.sa_is_admin());
 
-create policy "plan_participants_admin_write" on public.plan_participants
-  for all using (public.is_admin()) with check (public.is_admin());
+create policy "sa_plan_participants_admin_write" on public.sa_plan_participants
+  for all using (public.sa_is_admin()) with check (public.sa_is_admin());
 
--- activities
-create policy "activities_select_participant_or_admin" on public.activities
-  for select using (public.is_plan_participant(plan_id) or public.is_admin());
+-- sa_activities
+create policy "sa_activities_select_participant_or_admin" on public.sa_activities
+  for select using (public.sa_is_plan_participant(plan_id) or public.sa_is_admin());
 
-create policy "activities_admin_write" on public.activities
-  for all using (public.is_admin()) with check (public.is_admin());
+create policy "sa_activities_admin_write" on public.sa_activities
+  for all using (public.sa_is_admin()) with check (public.sa_is_admin());
 
--- expenses: los participantes pueden registrar sus propios gastos en un
+-- sa_expenses: los participantes pueden registrar sus propios gastos en un
 -- plan abierto; borrar/editar cualquier gasto queda solo para admin.
-create policy "expenses_select_participant_or_admin" on public.expenses
-  for select using (public.is_plan_participant(plan_id) or public.is_admin());
+create policy "sa_expenses_select_participant_or_admin" on public.sa_expenses
+  for select using (public.sa_is_plan_participant(plan_id) or public.sa_is_admin());
 
-create policy "expenses_insert_participant" on public.expenses
+create policy "sa_expenses_insert_participant" on public.sa_expenses
   for insert with check (
-    (public.is_plan_participant(plan_id) and created_by = public.current_person_id())
-    or public.is_admin()
+    (public.sa_is_plan_participant(plan_id) and created_by = public.sa_current_person_id())
+    or public.sa_is_admin()
   );
 
-create policy "expenses_modify_admin" on public.expenses
-  for update using (public.is_admin()) with check (public.is_admin());
+create policy "sa_expenses_modify_admin" on public.sa_expenses
+  for update using (public.sa_is_admin()) with check (public.sa_is_admin());
 
-create policy "expenses_delete_admin" on public.expenses
-  for delete using (public.is_admin());
+create policy "sa_expenses_delete_admin" on public.sa_expenses
+  for delete using (public.sa_is_admin());
 
--- settlements: solo lectura para participantes, escritura solo admin (al cerrar el plan)
-create policy "settlements_select_participant_or_admin" on public.settlements
-  for select using (public.is_plan_participant(plan_id) or public.is_admin());
+-- sa_settlements: solo lectura para participantes, escritura solo admin (al cerrar el plan)
+create policy "sa_settlements_select_participant_or_admin" on public.sa_settlements
+  for select using (public.sa_is_plan_participant(plan_id) or public.sa_is_admin());
 
-create policy "settlements_admin_write" on public.settlements
-  for all using (public.is_admin()) with check (public.is_admin());
+create policy "sa_settlements_admin_write" on public.sa_settlements
+  for all using (public.sa_is_admin()) with check (public.sa_is_admin());

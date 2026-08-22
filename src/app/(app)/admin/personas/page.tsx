@@ -12,7 +12,7 @@ export default async function PersonasPage() {
   const supabase = await createClient();
 
   const { data: people } = await supabase
-    .from("people")
+    .from("sa_people")
     .select("*")
     .order("created_at", { ascending: true });
 

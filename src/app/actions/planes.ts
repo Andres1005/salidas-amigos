@@ -41,7 +41,7 @@ export async function createPlan(
   }
 
   const { data: plan, error } = await supabase
-    .from("plans")
+    .from("sa_plans")
     .insert({
       name: parsed.data.name,
       destination: parsed.data.destination || null,
@@ -66,7 +66,7 @@ export async function createPlan(
   }));
 
   const { error: participantsError } = await supabase
-    .from("plan_participants")
+    .from("sa_plan_participants")
     .insert(participants);
 
   if (participantsError) {
@@ -87,7 +87,7 @@ export async function addParticipant(formData: FormData) {
   if (!planId || !personId) return;
 
   await supabase
-    .from("plan_participants")
+    .from("sa_plan_participants")
     .insert({ plan_id: planId, person_id: personId, share_weight: 1 });
 
   revalidatePath(`/planes/${planId}`);
@@ -105,7 +105,7 @@ export async function updateParticipantShare(formData: FormData) {
   if (!participantId || Number.isNaN(shareWeight) || shareWeight < 0) return;
 
   await supabase
-    .from("plan_participants")
+    .from("sa_plan_participants")
     .update({ share_weight: shareWeight, role_label: roleLabel })
     .eq("id", participantId);
 
@@ -119,6 +119,6 @@ export async function removeParticipant(formData: FormData) {
   const participantId = formData.get("participantId") as string;
   const planId = formData.get("planId") as string;
 
-  await supabase.from("plan_participants").delete().eq("id", participantId);
+  await supabase.from("sa_plan_participants").delete().eq("id", participantId);
   revalidatePath(`/planes/${planId}`);
 }

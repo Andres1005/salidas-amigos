@@ -16,7 +16,7 @@ export async function createActivity(formData: FormData) {
 
   if (!planId || !name) return;
 
-  await supabase.from("activities").insert({
+  await supabase.from("sa_activities").insert({
     plan_id: planId,
     name,
     activity_date: activityDate,
@@ -34,6 +34,6 @@ export async function deleteActivity(formData: FormData) {
   const activityId = formData.get("activityId") as string;
   const planId = formData.get("planId") as string;
 
-  await supabase.from("activities").delete().eq("id", activityId);
+  await supabase.from("sa_activities").delete().eq("id", activityId);
   revalidatePath(`/planes/${planId}`);
 }

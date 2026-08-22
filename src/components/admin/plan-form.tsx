@@ -87,10 +87,12 @@ export function PlanForm({ people }: { people: Person[] }) {
       </div>
 
       <div>
-        <Label>Participantes</Label>
+        <Label>Participantes (opcional)</Label>
         <p className="mb-3 text-xs text-ink-soft">
-          Selecciona quiénes van en este plan. Podrás ajustar el peso de cada
-          quien (para invitados u homenajeados) después de crearlo.
+          Tú quedas agregado automáticamente. Marca aquí a quienes ya sepas
+          que van, o simplemente crea el plan y comparte su código para que
+          cada quien se una por su cuenta — podrás ajustar el peso de cada
+          persona (para invitados u homenajeados) después.
         </p>
         <div className="grid gap-2 sm:grid-cols-2">
           {people.map((person) => {

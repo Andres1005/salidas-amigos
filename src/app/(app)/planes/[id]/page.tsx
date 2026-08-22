@@ -140,6 +140,7 @@ export default async function PlanDetailPage({
         activities={activitiesWithResponsible}
         participants={participantOptions}
         isAdmin={isAdmin}
+        currentPersonId={person.id}
       />
 
       {isAdmin && (

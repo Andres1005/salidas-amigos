@@ -48,9 +48,14 @@ export default async function PanelPage() {
             Hola, {person.full_name.split(" ")[0]} 👋
           </h1>
         </div>
-        {person.role === "admin" && (
-          <LinkButton href="/admin/planes/nuevo">+ Nuevo plan</LinkButton>
-        )}
+        <div className="flex flex-wrap gap-3">
+          <LinkButton href="/planes/unirse" variant="outline">
+            Unirme a un plan
+          </LinkButton>
+          {person.role === "admin" && (
+            <LinkButton href="/admin/planes/nuevo">+ Nuevo plan</LinkButton>
+          )}
+        </div>
       </div>
 
       {typedPlans.length === 0 ? (
@@ -59,14 +64,17 @@ export default async function PanelPage() {
           <h2 className="mt-3 text-lg font-bold">Todavía no hay planes por aquí</h2>
           <p className="mt-1 text-sm text-ink-soft">
             {person.role === "admin"
-              ? "Crea el primer plan y agrega a tu parche."
-              : "Cuando el admin te agregue a un plan, aparecerá aquí."}
+              ? "Crea el primer plan o únete con el código de uno existente."
+              : "Pídele a quien organiza el código del plan, o espera a que te agreguen."}
           </p>
-          {person.role === "admin" && (
-            <LinkButton href="/admin/planes/nuevo" className="mt-6">
-              Crear el primer plan
+          <div className="mt-6 flex flex-wrap justify-center gap-3">
+            <LinkButton href="/planes/unirse" variant="outline">
+              Unirme a un plan
             </LinkButton>
-          )}
+            {person.role === "admin" && (
+              <LinkButton href="/admin/planes/nuevo">Crear el primer plan</LinkButton>
+            )}
+          </div>
         </div>
       ) : (
         <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

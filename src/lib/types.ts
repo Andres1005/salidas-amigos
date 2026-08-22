@@ -2,6 +2,7 @@ export type PersonRole = "admin" | "member";
 export type InviteStatus = "pendiente" | "canjeada";
 export type PlanStatus = "abierto" | "cerrado";
 export type SplitMode = "equitativo" | "personalizado";
+export type ActivityStatus = "pendiente" | "aprobada";
 export type ExpenseCategory =
   | "alojamiento"
   | "transporte"
@@ -32,6 +33,7 @@ export interface Plan {
   end_date: string | null;
   status: PlanStatus;
   split_mode: SplitMode;
+  join_code: string;
   created_by: string;
   closed_at: string | null;
   created_at: string;
@@ -54,6 +56,8 @@ export interface Activity {
   activity_date: string | null;
   responsible_person_id: string | null;
   estimated_cost_cop: number | null;
+  status: ActivityStatus;
+  proposed_by: string | null;
   created_at: string;
 }
 

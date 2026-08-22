@@ -5,7 +5,7 @@ const FEATURES = [
     emoji: "🗺️",
     title: "Planes y actividades",
     description:
-      "Crea cada salida con su itinerario: actividades, fechas y un responsable asignado a cada una.",
+      "Arma el itinerario con fechas y un responsable por actividad. Cualquiera puede proponer una, y el admin la aprueba antes de que quede oficial.",
     tone: "primary",
   },
   {
@@ -37,10 +37,10 @@ const FEATURES = [
     tone: "coral",
   },
   {
-    emoji: "👤",
-    title: "Nombres para cada quien",
+    emoji: "🔗",
+    title: "Únete con un código",
     description:
-      "Cada persona tiene su propio nombre y perfil dentro del plan — nada de '@usuario1' genérico.",
+      "Cada plan tiene su propio código. Compártelo con quienes van, y se suman ellos mismos como participantes — sin que el admin tenga que agregar a nadie a mano.",
     tone: "sun",
   },
 ] as const;

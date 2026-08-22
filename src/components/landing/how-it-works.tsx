@@ -15,12 +15,18 @@ const STEPS = [
   },
   {
     number: "3",
-    title: "Registran los gastos",
+    title: "Te unes a un plan",
     description:
-      "Cada quien anota lo que pagó durante el plan: hospedaje, transporte, comida, actividades.",
+      "El admin te agrega, o entras tú mismo con el código del plan que te compartan — sin que nadie tenga que hacerlo por ti.",
   },
   {
     number: "4",
+    title: "Proponen y registran",
+    description:
+      "Cualquiera propone actividades y anota lo que pagó; el admin aprueba las actividades para que queden oficiales.",
+  },
+  {
+    number: "5",
     title: "Cierran el plan",
     description:
       "Al terminar, el admin cierra el plan y la app calcula automáticamente quién le debe a quién, en pesos colombianos.",
@@ -37,12 +43,12 @@ export function HowItWorks() {
               Cómo funciona
             </h2>
             <p className="mt-4 text-lg text-white/70">
-              De la invitación a la liquidación final, en cuatro pasos.
+              De la invitación a la liquidación final, en cinco pasos.
             </p>
           </div>
         </Reveal>
 
-        <div className="mt-14 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-14 grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {STEPS.map((step, i) => (
             <Reveal key={step.number} delay={i * 0.1}>
               <div className="relative">

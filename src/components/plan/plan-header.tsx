@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { closePlan, reopenPlan } from "@/app/actions/cierre";
+import { JoinCodeBadge } from "@/components/plan/join-code-badge";
 import { formatDate } from "@/lib/format";
 import type { Plan } from "@/lib/types";
 
@@ -31,6 +32,8 @@ export function PlanHeader({ plan, isAdmin }: { plan: Plan; isAdmin: boolean }) 
           <Badge tone={isOpen ? "sun" : "neutral"} className="bg-white/20 text-white">
             {isOpen ? "🟢 Plan abierto" : "🔒 Plan cerrado"}
           </Badge>
+
+          {isOpen && <JoinCodeBadge code={plan.join_code} />}
 
           {isAdmin && (
             <form action={isOpen ? closePlan : reopenPlan}>

@@ -34,6 +34,13 @@ export function AuthShell({
 
       <div className="flex flex-1 items-center justify-center bg-surface px-6 py-16">
         <div className="w-full max-w-sm">
+          <Link
+            href="/"
+            className="mb-6 flex items-center gap-2 text-lg font-extrabold text-ink lg:hidden"
+          >
+            <span className="text-xl">🌴</span> Salidas Amigos
+          </Link>
+
           <p className="text-sm font-bold uppercase tracking-wide text-primary-600">
             {eyebrow}
           </p>

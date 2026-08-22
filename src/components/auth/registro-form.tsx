@@ -9,17 +9,25 @@ import { PasswordInput } from "@/components/ui/password-input";
 
 const initialState: AuthFormState = {};
 
-export function RegistroForm() {
+export function RegistroForm({
+  defaultCode,
+  planCode,
+}: {
+  defaultCode?: string;
+  planCode?: string;
+}) {
   const [state, formAction, pending] = useActionState(redeemInvite, initialState);
 
   return (
     <form action={formAction} className="space-y-4">
+      {planCode && <input type="hidden" name="planCode" value={planCode} />}
       <div>
         <Label htmlFor="inviteCode">Código de invitación</Label>
         <Input
           id="inviteCode"
           name="inviteCode"
           placeholder="Ej. K7P2M9X"
+          defaultValue={defaultCode}
           className="uppercase tracking-widest"
           required
         />
@@ -51,7 +59,10 @@ export function RegistroForm() {
 
       <p className="text-center text-sm text-ink-soft">
         ¿Ya tienes cuenta?{" "}
-        <Link href="/iniciar-sesion" className="font-semibold text-primary-600 hover:underline">
+        <Link
+          href={planCode ? `/iniciar-sesion?planCode=${planCode}` : "/iniciar-sesion"}
+          className="font-semibold text-primary-600 hover:underline"
+        >
           Inicia sesión
         </Link>
       </p>

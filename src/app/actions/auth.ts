@@ -27,11 +27,17 @@ export async function login(
     return { error: parsed.error.issues[0]?.message ?? "Datos inválidos." };
   }
 
+  const planCode = (formData.get("planCode") as string) || null;
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
 
   if (error) {
     return { error: "Correo o contraseña incorrectos." };
+  }
+
+  if (planCode) {
+    const { data: planId } = await supabase.rpc("sa_join_plan_by_code", { code: planCode });
+    if (planId) redirect(`/planes/${planId}`);
   }
 
   redirect("/panel");
@@ -75,6 +81,7 @@ export async function redeemInvite(
   }
 
   const { inviteCode, email, password } = parsed.data;
+  const planCode = (formData.get("planCode") as string) || null;
   const admin = createAdminClient();
 
   const { data: person, error: lookupError } = await admin
@@ -151,7 +158,12 @@ export async function redeemInvite(
   });
 
   if (signInError) {
-    redirect("/iniciar-sesion?activada=1");
+    redirect(planCode ? `/iniciar-sesion?planCode=${planCode}` : "/iniciar-sesion?activada=1");
+  }
+
+  if (planCode) {
+    const { data: planId } = await supabase.rpc("sa_join_plan_by_code", { code: planCode });
+    if (planId) redirect(`/planes/${planId}`);
   }
 
   redirect("/panel");

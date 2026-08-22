@@ -9,11 +9,12 @@ import { PasswordInput } from "@/components/ui/password-input";
 
 const initialState: AuthFormState = {};
 
-export function LoginForm() {
+export function LoginForm({ planCode }: { planCode?: string }) {
   const [state, formAction, pending] = useActionState(login, initialState);
 
   return (
     <form action={formAction} className="space-y-4">
+      {planCode && <input type="hidden" name="planCode" value={planCode} />}
       <div>
         <Label htmlFor="email">Correo</Label>
         <Input id="email" name="email" type="email" placeholder="tucorreo@ejemplo.com" required />
@@ -31,7 +32,10 @@ export function LoginForm() {
 
       <p className="text-center text-sm text-ink-soft">
         ¿Tienes un código de invitación?{" "}
-        <Link href="/registro" className="font-semibold text-primary-600 hover:underline">
+        <Link
+          href={planCode ? `/registro?planCode=${planCode}` : "/registro"}
+          className="font-semibold text-primary-600 hover:underline"
+        >
           Activa tu cuenta
         </Link>
       </p>

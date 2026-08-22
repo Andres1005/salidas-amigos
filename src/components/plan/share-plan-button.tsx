@@ -2,8 +2,8 @@
 
 export function SharePlanButton({ planName, code }: { planName: string; code: string }) {
   async function share() {
-    const url = `${window.location.origin}/planes/unirse`;
-    const text = `¡Ey! Te agrego al parche "${planName}" 🎉\n\nÚnete en Salidas Amigos con el código: ${code}\n${url}`;
+    const url = `${window.location.origin}/planes/unirse?code=${encodeURIComponent(code)}`;
+    const text = `¡Ey! Te agrego al parche "${planName}" 🎉\n\nÚnete en Salidas Amigos con este link (si ya tienes cuenta, te agrega directo al plan):\n${url}\n\nCódigo por si te lo pide: ${code}`;
 
     if (navigator.share) {
       try {

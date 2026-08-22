@@ -33,6 +33,22 @@ export function PersonaRow({ person }: { person: Person }) {
     });
   }
 
+  async function shareInvite() {
+    const url = `${window.location.origin}/registro?codigo=${encodeURIComponent(person.invite_code)}`;
+    const text = `¡Hola ${person.full_name.split(" ")[0]}! Te agrego a Salidas Amigos 🌴\n\nActiva tu cuenta con este link:\n${url}\n\nCódigo por si te lo pide: ${person.invite_code}`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ text });
+      } catch {
+        // el usuario cerró el share sheet
+      }
+      return;
+    }
+
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
+  }
+
   return (
     <motion.div
       layout
@@ -63,6 +79,9 @@ export function PersonaRow({ person }: { person: Person }) {
             >
               {copied ? "¡Copiado!" : person.invite_code}
             </button>
+            <Button type="button" variant="ghost" size="sm" onClick={shareInvite}>
+              📲 Compartir
+            </Button>
             <Button
               type="button"
               variant="ghost"

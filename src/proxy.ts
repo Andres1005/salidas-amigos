@@ -38,13 +38,31 @@ export default async function proxy(request: NextRequest) {
 
   if (isProtected && !user) {
     const url = request.nextUrl.clone();
-    url.pathname = "/iniciar-sesion";
+    if (path.startsWith("/planes/unirse")) {
+      // Quien llega a un link de "unirme a un plan" sin sesión casi
+      // siempre es alguien nuevo que todavía no activa su cuenta, no
+      // alguien que ya tiene contraseña — mándalo a activar en vez de
+      // a iniciar sesión, y arrastra el código del plan para que lo
+      // use apenas termine de registrarse.
+      const planCode = url.searchParams.get("code");
+      url.pathname = "/registro";
+      url.search = planCode ? `?planCode=${encodeURIComponent(planCode)}` : "";
+    } else {
+      url.pathname = "/iniciar-sesion";
+    }
     return NextResponse.redirect(url);
   }
 
   if (isAuthRoute && user) {
     const url = request.nextUrl.clone();
-    url.pathname = "/panel";
+    const planCode = url.searchParams.get("planCode");
+    if (planCode) {
+      url.pathname = "/planes/unirse";
+      url.search = `?code=${encodeURIComponent(planCode)}`;
+    } else {
+      url.pathname = "/panel";
+      url.search = "";
+    }
     return NextResponse.redirect(url);
   }
 

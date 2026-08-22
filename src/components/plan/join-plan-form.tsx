@@ -7,7 +7,7 @@ import { Input, Label, FieldError } from "@/components/ui/field";
 
 const initialState: JoinPlanState = {};
 
-export function JoinPlanForm() {
+export function JoinPlanForm({ defaultCode }: { defaultCode?: string }) {
   const [state, formAction, pending] = useActionState(joinPlanByCode, initialState);
 
   return (
@@ -18,6 +18,7 @@ export function JoinPlanForm() {
           id="code"
           name="code"
           placeholder="Ej. K7P2M9X"
+          defaultValue={defaultCode}
           className="uppercase tracking-widest"
           required
         />

@@ -1,7 +1,13 @@
 import { Card, CardBody } from "@/components/ui/card";
 import { JoinPlanForm } from "@/components/plan/join-plan-form";
 
-export default function UnirsePlanPage() {
+export default async function UnirsePlanPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ code?: string }>;
+}) {
+  const { code } = await searchParams;
+
   return (
     <div className="mx-auto max-w-md">
       <p className="text-sm font-bold uppercase tracking-wide text-primary-600">Unirme a un plan</p>
@@ -14,7 +20,7 @@ export default function UnirsePlanPage() {
 
       <Card className="mt-8">
         <CardBody className="pt-6">
-          <JoinPlanForm />
+          <JoinPlanForm defaultCode={code} />
         </CardBody>
       </Card>
     </div>

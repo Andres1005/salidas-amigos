@@ -1,29 +1,26 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useTransition } from "react";
 import { motion } from "framer-motion";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { regenerateInviteCode, deletePerson } from "@/app/actions/personas";
-import { ShareInviteButton } from "@/components/admin/share-invite-button";
+import { approvePerson, rejectPerson, deletePerson } from "@/app/actions/personas";
 import type { Person } from "@/lib/types";
 
 export function PersonaRow({ person }: { person: Person }) {
-  const [copied, setCopied] = useState(false);
   const [isPending, startTransition] = useTransition();
-  const redeemed = person.invite_status === "canjeada";
 
-  function copyCode() {
-    navigator.clipboard.writeText(person.invite_code).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
+  function handleApprove() {
+    startTransition(() => {
+      void approvePerson(person.id);
     });
   }
 
-  function handleRegenerate() {
+  function handleReject() {
+    if (!confirm(`¿Rechazar la solicitud de ${person.full_name}?`)) return;
     startTransition(() => {
-      void regenerateInviteCode(person.id);
+      void rejectPerson(person.id);
     });
   }
 
@@ -52,30 +49,36 @@ export function PersonaRow({ person }: { person: Person }) {
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        {redeemed ? (
-          <Badge tone="primary">✓ Cuenta activa</Badge>
-        ) : (
+        {person.status === "pendiente" && (
           <>
-            <button
-              type="button"
-              onClick={copyCode}
-              className="rounded-full bg-surface-muted px-3 py-1.5 font-mono text-sm font-bold tracking-widest text-ink-soft transition-colors hover:bg-sun-100 hover:text-sun-800"
-              title="Copiar código"
-            >
-              {copied ? "¡Copiado!" : person.invite_code}
-            </button>
-            <ShareInviteButton fullName={person.full_name} inviteCode={person.invite_code} />
+            <Badge tone="sun">Pendiente de aprobación</Badge>
+            <Button type="button" size="sm" disabled={isPending} onClick={handleApprove}>
+              Aprobar
+            </Button>
             <Button
               type="button"
               variant="ghost"
               size="sm"
               disabled={isPending}
-              onClick={handleRegenerate}
+              onClick={handleReject}
+              className="text-coral-600 hover:bg-coral-50"
             >
-              Regenerar
+              Rechazar
             </Button>
           </>
         )}
+
+        {person.status === "aprobado" && <Badge tone="primary">✓ Activo</Badge>}
+
+        {person.status === "rechazado" && (
+          <>
+            <Badge tone="neutral">Rechazada</Badge>
+            <Button type="button" variant="ghost" size="sm" disabled={isPending} onClick={handleApprove}>
+              Aprobar de todos modos
+            </Button>
+          </>
+        )}
+
         {person.role !== "admin" && (
           <Button
             type="button"

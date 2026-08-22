@@ -3,21 +3,21 @@ import { Reveal } from "@/components/motion/reveal";
 const STEPS = [
   {
     number: "1",
-    title: "Te invitan al parche",
+    title: "Pides acceso",
     description:
-      "El admin te agrega con tu nombre y correo, y te comparte un código de invitación único.",
+      "Entras con el link de un plan (o directo a la app), pones tu nombre, correo y contraseña. Sin códigos.",
   },
   {
     number: "2",
-    title: "Registras tu cuenta",
+    title: "El admin aprueba",
     description:
-      "Canjeas el código, creas tu contraseña y quedas listo para ver los planes en los que participas.",
+      "Tu cuenta queda pendiente hasta que el admin del grupo la aprueba — así se mantiene cerrado a solo tu parche.",
   },
   {
     number: "3",
-    title: "Te unes a un plan",
+    title: "Entras al plan",
     description:
-      "El admin te agrega, o entras tú mismo con el código del plan que te compartan — sin que nadie tenga que hacerlo por ti.",
+      "Apenas te aprueban, ya estás dentro del plan al que te invitaron (o el admin te agrega a otros cuando quiera).",
   },
   {
     number: "4",

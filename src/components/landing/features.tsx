@@ -31,16 +31,16 @@ const FEATURES = [
   },
   {
     emoji: "🔒",
-    title: "Solo por invitación",
+    title: "Acceso con aprobación",
     description:
-      "Nadie se registra por su cuenta. Tú administras el roster de personas y compartes un código único para cada una.",
+      "Cualquiera puede pedir entrar, pero nadie queda dentro hasta que el admin del grupo aprueba su cuenta. Sin códigos que repartir ni perder.",
     tone: "coral",
   },
   {
     emoji: "🔗",
-    title: "Únete con un código",
+    title: "Únete con un link",
     description:
-      "Cada plan tiene su propio código. Compártelo con quienes van, y se suman ellos mismos como participantes — sin que el admin tenga que agregar a nadie a mano.",
+      "Cada plan tiene su propio link para compartir. Quien lo recibe se suma directo — y si es nuevo, su cuenta queda lista apenas la apruebes.",
     tone: "sun",
   },
 ] as const;

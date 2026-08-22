@@ -6,8 +6,6 @@ import { BalanceSummary } from "@/components/plan/balance-summary";
 import { ActivitiesSection } from "@/components/plan/activities-section";
 import { ExpensesSection } from "@/components/plan/expenses-section";
 import { ParticipantsSection } from "@/components/plan/participants-section";
-import { ShareInviteButton } from "@/components/admin/share-invite-button";
-import { Card, CardBody } from "@/components/ui/card";
 import type {
   Activity,
   Expense,
@@ -22,13 +20,10 @@ export const dynamic = "force-dynamic";
 
 export default async function PlanDetailPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ nuevo?: string }>;
 }) {
   const { id } = await params;
-  const { nuevo } = await searchParams;
   const person = await requirePerson();
   const supabase = await createClient();
 
@@ -63,7 +58,7 @@ export default async function PlanDetailPage({
       .eq("plan_id", id)
       .order("expense_date", { ascending: false }),
     supabase.from("sa_settlements").select("*").eq("plan_id", id),
-    supabase.from("sa_people").select("*").order("full_name", { ascending: true }),
+    supabase.from("sa_people").select("*").eq("status", "aprobado").order("full_name", { ascending: true }),
   ]);
 
   const typedPlan = plan as Plan;
@@ -119,26 +114,10 @@ export default async function PlanDetailPage({
 
   const isAdmin = person.role === "admin";
   const isOpen = typedPlan.status === "abierto";
-  const newPerson = nuevo ? people.find((p) => p.id === nuevo) : undefined;
 
   return (
     <div className="space-y-6">
       <PlanHeader plan={typedPlan} isAdmin={isAdmin} />
-
-      {newPerson && (
-        <Card className="border-primary-200 bg-primary-50/60">
-          <CardBody className="flex flex-wrap items-center justify-between gap-3 pt-6">
-            <p className="text-sm font-semibold text-primary-800">
-              ✅ {newPerson.full_name} quedó agregado al plan. Envíale su link de activación:
-            </p>
-            <ShareInviteButton
-              fullName={newPerson.full_name}
-              inviteCode={newPerson.invite_code}
-              className="bg-white"
-            />
-          </CardBody>
-        </Card>
-      )}
 
       <BalanceSummary
         tallies={tallies}

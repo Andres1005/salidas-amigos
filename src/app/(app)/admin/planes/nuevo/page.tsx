@@ -13,6 +13,7 @@ export default async function NuevoPlanPage() {
   const { data: people } = await supabase
     .from("sa_people")
     .select("*")
+    .eq("status", "aprobado")
     .order("full_name", { ascending: true });
 
   return (

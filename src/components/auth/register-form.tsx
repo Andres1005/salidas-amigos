@@ -2,19 +2,19 @@
 
 import { useActionState } from "react";
 import Link from "next/link";
-import { registerViaPlanCode, type AuthFormState } from "@/app/actions/auth";
+import { register, type AuthFormState } from "@/app/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input, Label, FieldError } from "@/components/ui/field";
 import { PasswordInput } from "@/components/ui/password-input";
 
 const initialState: AuthFormState = {};
 
-export function PlanRegisterForm({ planCode }: { planCode: string }) {
-  const [state, formAction, pending] = useActionState(registerViaPlanCode, initialState);
+export function RegisterForm({ planCode }: { planCode?: string }) {
+  const [state, formAction, pending] = useActionState(register, initialState);
 
   return (
     <form action={formAction} className="space-y-4">
-      <input type="hidden" name="planCode" value={planCode} />
+      {planCode && <input type="hidden" name="planCode" value={planCode} />}
       <div>
         <Label htmlFor="fullName">Tu nombre</Label>
         <Input id="fullName" name="fullName" placeholder="Ej. Camila Ramírez" required />
@@ -35,13 +35,13 @@ export function PlanRegisterForm({ planCode }: { planCode: string }) {
       <FieldError>{state.error}</FieldError>
 
       <Button type="submit" size="lg" className="w-full" disabled={pending}>
-        {pending ? "Creando tu cuenta..." : "Crear cuenta y unirme"}
+        {pending ? "Creando tu cuenta..." : "Crear cuenta"}
       </Button>
 
       <p className="text-center text-sm text-ink-soft">
         ¿Ya tienes cuenta?{" "}
         <Link
-          href={`/iniciar-sesion?planCode=${planCode}`}
+          href={planCode ? `/iniciar-sesion?planCode=${planCode}` : "/iniciar-sesion"}
           className="font-semibold text-primary-600 hover:underline"
         >
           Inicia sesión

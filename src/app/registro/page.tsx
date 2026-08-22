@@ -1,36 +1,24 @@
 import { AuthShell } from "@/components/auth/auth-shell";
-import { RegistroForm } from "@/components/auth/registro-form";
-import { PlanRegisterForm } from "@/components/auth/plan-register-form";
+import { RegisterForm } from "@/components/auth/register-form";
 
 export default async function RegistroPage({
   searchParams,
 }: {
-  searchParams: Promise<{ codigo?: string; planCode?: string }>;
+  searchParams: Promise<{ planCode?: string }>;
 }) {
-  const { codigo, planCode } = await searchParams;
-
-  // Si llegan con el link de un plan y no traen un código personal, el
-  // código del plan ya es la autorización: se registran directo, sin
-  // que el admin tenga que agregarlos antes en Personas.
-  if (planCode && !codigo) {
-    return (
-      <AuthShell
-        eyebrow="Te invitaron a un plan"
-        title="Crea tu cuenta"
-        subtitle="Completa tus datos y quedas agregado directo al plan."
-      >
-        <PlanRegisterForm planCode={planCode} />
-      </AuthShell>
-    );
-  }
+  const { planCode } = await searchParams;
 
   return (
     <AuthShell
-      eyebrow="Acceso por invitación"
-      title="Activa tu cuenta"
-      subtitle="Usa el código y el correo que te compartió el admin del grupo."
+      eyebrow={planCode ? "Te invitaron a un plan" : "Únete al parche"}
+      title="Crea tu cuenta"
+      subtitle={
+        planCode
+          ? "Completa tus datos. El admin aprueba tu acceso y quedas agregado directo al plan."
+          : "Completa tus datos. El admin del grupo tiene que aprobar tu acceso antes de que puedas entrar."
+      }
     >
-      <RegistroForm defaultCode={codigo} planCode={planCode} />
+      <RegisterForm planCode={planCode} />
     </AuthShell>
   );
 }

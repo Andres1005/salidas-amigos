@@ -1,7 +1,5 @@
 import { requireAdmin } from "@/lib/dal";
 import { createClient } from "@/lib/supabase/server";
-import { Card, CardHeader, CardBody } from "@/components/ui/card";
-import { PersonaForm } from "@/components/admin/persona-form";
 import { PersonaRow } from "@/components/admin/persona-row";
 import type { Person } from "@/lib/types";
 
@@ -17,43 +15,60 @@ export default async function PersonasPage() {
     .order("created_at", { ascending: true });
 
   const typedPeople = (people ?? []) as Person[];
-  const pendingCount = typedPeople.filter((p) => p.invite_status === "pendiente").length;
+  const pending = typedPeople.filter((p) => p.status === "pendiente");
+  const approved = typedPeople.filter((p) => p.status === "aprobado");
+  const rejected = typedPeople.filter((p) => p.status === "rechazado");
 
   return (
     <div>
       <p className="text-sm font-bold uppercase tracking-wide text-primary-600">Administración</p>
       <h1 className="mt-1 text-2xl font-extrabold tracking-tight sm:text-3xl">Personas</h1>
       <p className="mt-2 max-w-xl text-sm text-ink-soft">
-        Solo las personas que agregues aquí pueden crear una cuenta. Comparte el
-        código de invitación de cada una para que puedan activarse en{" "}
-        <span className="font-semibold">/registro</span>.
+        Cualquiera puede pedir una cuenta desde <span className="font-semibold">/registro</span>{" "}
+        o el link de un plan, pero nadie entra hasta que tú apruebas su solicitud aquí.
       </p>
 
-      <Card className="mt-6">
-        <CardHeader>
-          <h2 className="font-bold">Agregar nueva persona</h2>
-        </CardHeader>
-        <CardBody>
-          <PersonaForm />
-        </CardBody>
-      </Card>
+      {pending.length > 0 && (
+        <div className="mt-8">
+          <h2 className="font-bold">
+            {pending.length} solicitud{pending.length === 1 ? "" : "es"} pendiente
+            {pending.length === 1 ? "" : "s"}
+          </h2>
+          <div className="mt-4 space-y-3">
+            {pending.map((person) => (
+              <PersonaRow key={person.id} person={person} />
+            ))}
+          </div>
+        </div>
+      )}
 
-      <div className="mt-8 flex items-center justify-between">
+      <div className="mt-8">
         <h2 className="font-bold">
-          {typedPeople.length} {typedPeople.length === 1 ? "persona" : "personas"}
+          {approved.length} {approved.length === 1 ? "persona activa" : "personas activas"}
         </h2>
-        {pendingCount > 0 && (
-          <p className="text-sm text-ink-soft">
-            {pendingCount} pendiente{pendingCount === 1 ? "" : "s"} de activar
+        {approved.length === 0 ? (
+          <p className="mt-4 rounded-2xl bg-surface-muted/70 px-4 py-6 text-center text-sm text-ink-soft">
+            Todavía no hay personas aprobadas.
           </p>
+        ) : (
+          <div className="mt-4 space-y-3">
+            {approved.map((person) => (
+              <PersonaRow key={person.id} person={person} />
+            ))}
+          </div>
         )}
       </div>
 
-      <div className="mt-4 space-y-3">
-        {typedPeople.map((person) => (
-          <PersonaRow key={person.id} person={person} />
-        ))}
-      </div>
+      {rejected.length > 0 && (
+        <div className="mt-8">
+          <h2 className="font-bold text-ink-soft">Rechazadas</h2>
+          <div className="mt-4 space-y-3">
+            {rejected.map((person) => (
+              <PersonaRow key={person.id} person={person} />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

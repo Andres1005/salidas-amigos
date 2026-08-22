@@ -22,8 +22,8 @@ export default async function SinAccesoPage() {
         <h1 className="mt-4 text-xl font-extrabold">Tu cuenta no tiene acceso</h1>
         <p className="mt-2 text-sm text-ink-soft">
           {user?.email ? <span className="font-semibold">{user.email}</span> : "Esta cuenta"} no
-          está vinculada a Salidas Amigos. Pídele al admin del grupo que te
-          agregue y te comparta un código de invitación.
+          está vinculada a Salidas Amigos. Pídele al admin del grupo que te dé acceso,
+          o crea tu cuenta desde cero en <span className="font-semibold">/registro</span>.
         </p>
         <form action={logout} className="mt-6">
           <Button type="submit" variant="outline" className="w-full">

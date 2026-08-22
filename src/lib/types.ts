@@ -1,5 +1,5 @@
 export type PersonRole = "admin" | "member";
-export type InviteStatus = "pendiente" | "canjeada";
+export type ApprovalStatus = "pendiente" | "aprobado" | "rechazado";
 export type PlanStatus = "abierto" | "cerrado";
 export type SplitMode = "equitativo" | "personalizado";
 export type ActivityStatus = "pendiente" | "aprobada";
@@ -17,8 +17,7 @@ export interface Person {
   full_name: string;
   email: string;
   role: PersonRole;
-  invite_code: string;
-  invite_status: InviteStatus;
+  status: ApprovalStatus;
   auth_user_id: string | null;
   created_at: string;
 }

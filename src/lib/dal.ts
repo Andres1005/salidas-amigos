@@ -33,6 +33,8 @@ export async function requirePerson(): Promise<Person> {
   // sa_people (puede pasar si este proyecto de Supabase es compartido con
   // otra app) — no un caso de "no ha iniciado sesión".
   if (!person) redirect("/sin-acceso");
+  if (person.status === "pendiente") redirect("/pendiente-aprobacion");
+  if (person.status === "rechazado") redirect("/sin-acceso");
   return person;
 }
 

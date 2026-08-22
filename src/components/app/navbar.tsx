@@ -7,15 +7,15 @@ import { Avatar } from "@/components/ui/avatar";
 import { cn } from "@/lib/cn";
 import type { Person } from "@/lib/types";
 
-export function Navbar({ person }: { person: Person }) {
+export function Navbar({ person, pendingCount = 0 }: { person: Person; pendingCount?: number }) {
   const pathname = usePathname();
 
-  const links = [
-    { href: "/panel", label: "Mis planes" },
+  const links: { href: string; label: string; badge: number }[] = [
+    { href: "/panel", label: "Mis planes", badge: 0 },
     ...(person.role === "admin"
       ? [
-          { href: "/admin/personas", label: "Personas" },
-          { href: "/admin/planes/nuevo", label: "Nuevo plan" },
+          { href: "/admin/personas", label: "Personas", badge: pendingCount },
+          { href: "/admin/planes/nuevo", label: "Nuevo plan", badge: 0 },
         ]
       : []),
   ];
@@ -35,13 +35,18 @@ export function Navbar({ person }: { person: Person }) {
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "rounded-full px-4 py-2 text-sm font-semibold transition-colors",
+                  "flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-colors",
                   active
                     ? "bg-primary-500 text-white shadow-sm shadow-primary-500/30"
                     : "text-ink-soft hover:bg-ink/5 hover:text-ink"
                 )}
               >
                 {link.label}
+                {link.badge > 0 && (
+                  <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-coral-500 px-1 text-xs font-bold text-white">
+                    {link.badge}
+                  </span>
+                )}
               </Link>
             );
           })}
@@ -74,11 +79,16 @@ export function Navbar({ person }: { person: Person }) {
               key={link.href}
               href={link.href}
               className={cn(
-                "shrink-0 rounded-full px-4 py-1.5 text-sm font-semibold",
+                "flex shrink-0 items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold",
                 active ? "bg-primary-500 text-white" : "bg-ink/5 text-ink-soft"
               )}
             >
               {link.label}
+              {link.badge > 0 && (
+                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-coral-500 px-1 text-xs font-bold text-white">
+                  {link.badge}
+                </span>
+              )}
             </Link>
           );
         })}

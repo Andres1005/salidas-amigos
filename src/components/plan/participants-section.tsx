@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/field";
 import { ConfirmSubmit } from "@/components/ui/confirm-submit";
 import { ParticipantPresetSelect } from "@/components/plan/participant-preset-select";
-import { InviteNewParticipantForm } from "@/components/plan/invite-new-participant-form";
 import {
   updateParticipantShare,
   removeParticipant,
@@ -85,7 +84,10 @@ export function ParticipantsSection({
           </form>
         )}
 
-        <InviteNewParticipantForm planId={planId} />
+        <p className="text-xs text-ink-soft">
+          ¿La persona que buscas no aparece? Comparte el código de este plan (arriba)
+          para que se registre — apenas la apruebes en Personas, aparece aquí.
+        </p>
       </CardBody>
     </Card>
   );

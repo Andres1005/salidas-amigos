@@ -16,7 +16,7 @@ export function Hero() {
             transition={{ duration: 0.5 }}
             className="inline-flex items-center gap-2 rounded-full bg-sun-100 px-4 py-1.5 text-sm font-bold text-sun-800"
           >
-            ✨ Acceso solo por invitación
+            ✨ Acceso aprobado por el admin
           </motion.span>
 
           <motion.h1
@@ -62,8 +62,8 @@ export function Hero() {
             transition={{ duration: 0.6, delay: 0.4 }}
             className="mt-6 text-sm font-medium text-ink-soft"
           >
-            ¿Tu grupo aún no tiene cuentas? El admin del grupo administra quién
-            entra y reparte los códigos de invitación.
+            ¿Tu grupo aún no tiene cuentas? Cualquiera puede pedir acceso — el
+            admin del grupo decide a quién aprueba.
           </motion.p>
         </div>
 

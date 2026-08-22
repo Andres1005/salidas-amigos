@@ -31,12 +31,12 @@ export function LoginForm({ planCode }: { planCode?: string }) {
       </Button>
 
       <p className="text-center text-sm text-ink-soft">
-        ¿Tienes un código de invitación?{" "}
+        ¿Eres nuevo?{" "}
         <Link
           href={planCode ? `/registro?planCode=${planCode}` : "/registro"}
           className="font-semibold text-primary-600 hover:underline"
         >
-          Activa tu cuenta
+          Crea tu cuenta
         </Link>
       </p>
     </form>

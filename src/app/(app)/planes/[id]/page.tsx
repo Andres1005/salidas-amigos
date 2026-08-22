@@ -63,17 +63,19 @@ export default async function PlanDetailPage({
 
   const typedPlan = plan as Plan;
   const participants = (participantRows ?? []) as (PlanParticipant & {
-    person: Pick<Person, "id" | "full_name">;
+    person: Pick<Person, "id" | "full_name"> | null;
   })[];
   const activities = (activityRows ?? []) as Activity[];
   const expenses = (expenseRows ?? []) as Expense[];
   const settlements = (settlementRows ?? []) as Settlement[];
   const people = (allPeople ?? []) as Person[];
 
-  const nameById = new Map(participants.map((p) => [p.person_id, p.person.full_name]));
+  const nameById = new Map(
+    participants.map((p) => [p.person_id, p.person?.full_name ?? "Alguien"])
+  );
   const participantOptions = participants.map((p) => ({
     id: p.person_id,
-    full_name: p.person.full_name,
+    full_name: p.person?.full_name ?? "Alguien",
   }));
   const availablePeople = people.filter(
     (p) => !participants.some((pp) => pp.person_id === p.id)
@@ -89,7 +91,7 @@ export default async function PlanDetailPage({
 
   const tallies: ParticipantTally[] = participants.map((p) => ({
     personId: p.person_id,
-    name: p.person.full_name,
+    name: p.person?.full_name ?? "Alguien",
     weight: Number(p.share_weight),
     paid: paidByPerson.get(p.person_id) ?? 0,
   }));

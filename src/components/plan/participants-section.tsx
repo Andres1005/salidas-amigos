@@ -13,7 +13,7 @@ import { presetFor } from "@/lib/participant-presets";
 import type { PlanParticipant, Person } from "@/lib/types";
 
 interface ParticipantWithPerson extends PlanParticipant {
-  person: Pick<Person, "id" | "full_name">;
+  person: Pick<Person, "id" | "full_name"> | null;
 }
 
 export function ParticipantsSection({
@@ -45,15 +45,17 @@ export function ParticipantsSection({
             <input type="hidden" name="participantId" value={participant.id} />
             <input type="hidden" name="planId" value={planId} />
 
-            <Avatar name={participant.person.full_name} size="sm" />
-            <span className="min-w-[9rem] text-sm font-bold">{participant.person.full_name}</span>
+            <Avatar name={participant.person?.full_name ?? "Alguien"} size="sm" />
+            <span className="min-w-[9rem] text-sm font-bold">
+              {participant.person?.full_name ?? "Alguien"}
+            </span>
 
             <ParticipantPresetSelect
               defaultValue={presetFor(participant.role_label, Number(participant.share_weight))}
             />
 
             <ConfirmSubmit
-              message={`¿Quitar a ${participant.person.full_name} de este plan?`}
+              message={`¿Quitar a ${participant.person?.full_name ?? "esta persona"} de este plan?`}
               formAction={removeParticipant}
               className="ml-auto text-xs font-semibold text-coral-500 hover:text-coral-700"
             >

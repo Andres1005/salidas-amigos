@@ -5,6 +5,7 @@ import Link from "next/link";
 import { redeemInvite, type AuthFormState } from "@/app/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input, Label, FieldError } from "@/components/ui/field";
+import { PasswordInput } from "@/components/ui/password-input";
 
 const initialState: AuthFormState = {};
 
@@ -35,11 +36,11 @@ export function RegistroForm() {
       </div>
       <div>
         <Label htmlFor="password">Contraseña</Label>
-        <Input id="password" name="password" type="password" placeholder="Mínimo 8 caracteres" required />
+        <PasswordInput id="password" name="password" placeholder="Mínimo 8 caracteres" required />
       </div>
       <div>
         <Label htmlFor="confirmPassword">Confirma tu contraseña</Label>
-        <Input id="confirmPassword" name="confirmPassword" type="password" required />
+        <PasswordInput id="confirmPassword" name="confirmPassword" required />
       </div>
 
       <FieldError>{state.error}</FieldError>

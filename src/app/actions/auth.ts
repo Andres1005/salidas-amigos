@@ -107,7 +107,7 @@ export async function redeemInvite(
 
   if (created.user) {
     authUserId = created.user.id;
-  } else if (createError?.message === "User already registered") {
+  } else if (createError?.message.toLowerCase().includes("already been registered")) {
     // Este proyecto de Supabase también sirve otra app: la persona puede ya
     // tener un usuario de Auth por ese lado. Lo reutilizamos en vez de
     // fallar, fijando la contraseña que acaba de elegir aquí.
@@ -131,8 +131,7 @@ export async function redeemInvite(
 
     authUserId = existingUser.id;
   } else {
-    // TODO: revertir a mensaje genérico una vez diagnosticado el error real.
-    return { error: `No pudimos crear tu cuenta: ${createError?.message ?? "error desconocido"}` };
+    return { error: "No pudimos crear tu cuenta. Intenta de nuevo." };
   }
 
   const { error: updateError } = await admin

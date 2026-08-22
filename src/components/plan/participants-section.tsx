@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/field";
 import { ConfirmSubmit } from "@/components/ui/confirm-submit";
 import { ParticipantPresetSelect } from "@/components/plan/participant-preset-select";
+import { InviteNewParticipantForm } from "@/components/plan/invite-new-participant-form";
 import {
   updateParticipantShare,
   removeParticipant,
@@ -83,6 +84,8 @@ export function ParticipantsSection({
             </Button>
           </form>
         )}
+
+        <InviteNewParticipantForm planId={planId} />
       </CardBody>
     </Card>
   );

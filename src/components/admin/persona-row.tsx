@@ -6,6 +6,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { regenerateInviteCode, deletePerson } from "@/app/actions/personas";
+import { ShareInviteButton } from "@/components/admin/share-invite-button";
 import type { Person } from "@/lib/types";
 
 export function PersonaRow({ person }: { person: Person }) {
@@ -31,22 +32,6 @@ export function PersonaRow({ person }: { person: Person }) {
     startTransition(() => {
       void deletePerson(person.id);
     });
-  }
-
-  async function shareInvite() {
-    const url = `${window.location.origin}/registro?codigo=${encodeURIComponent(person.invite_code)}`;
-    const text = `¡Hola ${person.full_name.split(" ")[0]}! Te agrego a Salidas Amigos 🌴\n\nActiva tu cuenta con este link:\n${url}\n\nCódigo por si te lo pide: ${person.invite_code}`;
-
-    if (navigator.share) {
-      try {
-        await navigator.share({ text });
-      } catch {
-        // el usuario cerró el share sheet
-      }
-      return;
-    }
-
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
   }
 
   return (
@@ -79,9 +64,7 @@ export function PersonaRow({ person }: { person: Person }) {
             >
               {copied ? "¡Copiado!" : person.invite_code}
             </button>
-            <Button type="button" variant="ghost" size="sm" onClick={shareInvite}>
-              📲 Compartir
-            </Button>
+            <ShareInviteButton fullName={person.full_name} inviteCode={person.invite_code} />
             <Button
               type="button"
               variant="ghost"

@@ -117,6 +117,64 @@ export async function joinPlanByCode(
   redirect(`/planes/${planId}`);
 }
 
+const newParticipantSchema = z.object({
+  fullName: z.string().trim().min(2, "El nombre es muy corto."),
+  email: z.string().trim().toLowerCase().email("Ingresa un correo válido."),
+});
+
+export async function inviteNewParticipant(
+  _prevState: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  await requireAdmin();
+  const supabase = await createClient();
+
+  const planId = formData.get("planId") as string;
+
+  const parsed = newParticipantSchema.safeParse({
+    fullName: formData.get("fullName"),
+    email: formData.get("email"),
+  });
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Datos inválidos." };
+  }
+
+  let personId: string | null = null;
+  for (let attempt = 0; attempt < 5 && !personId; attempt++) {
+    const { data, error } = await supabase
+      .from("sa_people")
+      .insert({
+        full_name: parsed.data.fullName,
+        email: parsed.data.email,
+        invite_code: generateInviteCode(),
+      })
+      .select("id")
+      .single();
+
+    if (data) {
+      personId = data.id;
+    } else if (error?.code === "23505" && error.message.includes("invite_code")) {
+      continue; // colisión de código, reintenta
+    } else if (error?.code === "23505") {
+      return { error: "Ya existe una persona con ese correo." };
+    } else {
+      return { error: "No se pudo agregar a la persona." };
+    }
+  }
+
+  if (!personId) {
+    return { error: "No se pudo generar un código único. Intenta de nuevo." };
+  }
+
+  await supabase
+    .from("sa_plan_participants")
+    .insert({ plan_id: planId, person_id: personId, share_weight: 1 });
+
+  revalidatePath(`/planes/${planId}`);
+  redirect(`/planes/${planId}?nuevo=${personId}`);
+}
+
 export async function addParticipant(formData: FormData) {
   await requireAdmin();
   const supabase = await createClient();

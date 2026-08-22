@@ -22,5 +22,7 @@ as $$
   );
 $$;
 
+drop policy if exists "sa_people_select_co_participant" on public.sa_people;
+
 create policy "sa_people_select_co_participant" on public.sa_people
   for select using (public.sa_shares_plan_with(id));

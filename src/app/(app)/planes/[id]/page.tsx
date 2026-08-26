@@ -166,6 +166,7 @@ export default async function PlanDetailPage({
         isClosed={!isOpen}
         storedTransfers={storedTransfers}
         currentPersonId={person.id}
+        activitiesBudget={totalEstimated}
       />
 
       <ExpensesSection

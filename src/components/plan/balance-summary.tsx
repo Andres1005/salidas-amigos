@@ -9,11 +9,13 @@ export function BalanceSummary({
   isClosed,
   storedTransfers,
   currentPersonId,
+  activitiesBudget,
 }: {
   tallies: ParticipantTally[];
   isClosed: boolean;
   storedTransfers: Transfer[];
   currentPersonId: string;
+  activitiesBudget?: number;
 }) {
   const { totalCOP, balances, transfers: liveTransfers } = computeSettlement(tallies);
   const transfers = isClosed ? storedTransfers : liveTransfers;
@@ -23,7 +25,10 @@ export function BalanceSummary({
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
           <h2 className="font-bold">{isClosed ? "Liquidación final" : "Balance en vivo"}</h2>
-          <p className="text-sm text-ink-soft">Total gastado: {formatCOP(totalCOP)}</p>
+          <p className="text-sm text-ink-soft">Gastado: {formatCOP(totalCOP)}</p>
+          {!!activitiesBudget && (
+            <p className="text-sm text-ink-soft">Presupuesto de actividades: {formatCOP(activitiesBudget)}</p>
+          )}
         </div>
         {!isClosed && <Badge tone="sun">Vista previa · se confirma al cerrar</Badge>}
       </CardHeader>

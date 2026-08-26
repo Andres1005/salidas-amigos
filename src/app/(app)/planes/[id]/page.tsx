@@ -8,6 +8,7 @@ import { ExpensesSection } from "@/components/plan/expenses-section";
 import { ParticipantsSection } from "@/components/plan/participants-section";
 import type {
   Activity,
+  ActivityNote,
   Expense,
   Person,
   Plan,
@@ -70,6 +71,17 @@ export default async function PlanDetailPage({
   const settlements = (settlementRows ?? []) as Settlement[];
   const people = (allPeople ?? []) as Person[];
 
+  const activityIds = activities.map((a) => a.id);
+  const { data: noteRows } =
+    activityIds.length > 0
+      ? await supabase
+          .from("sa_activity_notes")
+          .select("*")
+          .in("activity_id", activityIds)
+          .order("created_at", { ascending: true })
+      : { data: [] as ActivityNote[] };
+  const notes = (noteRows ?? []) as ActivityNote[];
+
   const nameById = new Map(
     participants.map((p) => [p.person_id, p.person?.full_name ?? "Alguien"])
   );
@@ -104,9 +116,18 @@ export default async function PlanDetailPage({
     amount: Number(s.amount_cop),
   }));
 
+  const notesByActivity = new Map<string, (ActivityNote & { person_name: string })[]>();
+  for (const note of notes) {
+    const withName = { ...note, person_name: nameById.get(note.person_id) ?? "Alguien" };
+    const list = notesByActivity.get(note.activity_id) ?? [];
+    list.push(withName);
+    notesByActivity.set(note.activity_id, list);
+  }
+
   const activitiesWithResponsible = activities.map((a) => ({
     ...a,
     responsible_name: a.responsible_person_id ? nameById.get(a.responsible_person_id) ?? null : null,
+    notes: notesByActivity.get(a.id) ?? [],
   }));
 
   const expensesWithPayer = expenses.map((e) => ({

@@ -73,6 +73,14 @@ export interface Expense {
   created_at: string;
 }
 
+export interface ActivityNote {
+  id: string;
+  activity_id: string;
+  person_id: string;
+  body: string;
+  created_at: string;
+}
+
 export interface Settlement {
   id: string;
   plan_id: string;

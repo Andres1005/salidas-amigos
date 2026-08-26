@@ -16,3 +16,12 @@ export function formatDate(date: string | null) {
     year: "numeric",
   }).format(new Date(`${date}T00:00:00`));
 }
+
+export function formatDateTime(isoString: string) {
+  return new Intl.DateTimeFormat("es-CO", {
+    day: "numeric",
+    month: "short",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date(isoString));
+}

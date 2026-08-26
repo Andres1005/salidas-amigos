@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { PlanHeader } from "@/components/plan/plan-header";
 import { BalanceSummary } from "@/components/plan/balance-summary";
 import { ActivitiesSection } from "@/components/plan/activities-section";
+import type { ActivityBudgetTotals } from "@/components/plan/activities-section";
 import { ExpensesSection } from "@/components/plan/expenses-section";
 import { ParticipantsSection } from "@/components/plan/participants-section";
 import type {
@@ -135,6 +136,24 @@ export default async function PlanDetailPage({
     paid_by_name: nameById.get(e.paid_by_person_id) ?? "Alguien",
   }));
 
+  const totalEstimated = activities.reduce(
+    (sum, a) => (a.no_budget ? sum : sum + Number(a.actual_cost_cop ?? a.estimated_cost_cop ?? 0)),
+    0
+  );
+  const totalActual = activities.reduce((sum, a) => sum + Number(a.actual_cost_cop ?? 0), 0);
+  const totalWeight = participants.reduce((sum, p) => sum + Number(p.share_weight), 0);
+  const budgetTotals: ActivityBudgetTotals = {
+    totalEstimated,
+    totalActual,
+    perPerson:
+      totalWeight > 0
+        ? participants.map((p) => ({
+            name: p.person?.full_name ?? "Alguien",
+            share: totalEstimated * (Number(p.share_weight) / totalWeight),
+          }))
+        : [],
+  };
+
   const isAdmin = person.role === "admin";
   const isOpen = typedPlan.status === "abierto";
 
@@ -162,6 +181,7 @@ export default async function PlanDetailPage({
         planId={typedPlan.id}
         activities={activitiesWithResponsible}
         participants={participantOptions}
+        budgetTotals={budgetTotals}
         isAdmin={isAdmin}
         currentPersonId={person.id}
       />

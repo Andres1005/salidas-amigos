@@ -55,6 +55,8 @@ export interface Activity {
   activity_date: string | null;
   responsible_person_id: string | null;
   estimated_cost_cop: number | null;
+  actual_cost_cop: number | null;
+  no_budget: boolean;
   status: ActivityStatus;
   proposed_by: string | null;
   created_at: string;

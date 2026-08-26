@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input, Label, Select, Textarea } from "@/components/ui/field";
 import { proposeActivity } from "@/app/actions/actividades";
 import { ActivityRow } from "@/components/plan/activity-row";
+import { formatCOP } from "@/lib/format";
 import type { Activity, ActivityNote } from "@/lib/types";
 
 interface ActivityWithExtras extends Activity {
@@ -10,16 +11,55 @@ interface ActivityWithExtras extends Activity {
   notes: (ActivityNote & { person_name: string })[];
 }
 
+export interface ActivityBudgetTotals {
+  totalEstimated: number;
+  totalActual: number;
+  perPerson: { name: string; share: number }[];
+}
+
+function BudgetSummary({ totals }: { totals: ActivityBudgetTotals }) {
+  if (totals.totalEstimated === 0 && totals.totalActual === 0) return null;
+
+  return (
+    <div className="rounded-2xl bg-primary-50 p-4">
+      <p className="text-xs font-bold uppercase tracking-wide text-primary-700">Presupuesto de actividades</p>
+      <div className="mt-2 flex flex-wrap gap-x-6 gap-y-2 text-sm">
+        <p>
+          <span className="text-ink-soft">Estimado total: </span>
+          <span className="font-bold text-ink">{formatCOP(totals.totalEstimated)}</span>
+        </p>
+        {totals.totalActual > 0 && (
+          <p>
+            <span className="text-ink-soft">Ya gastado: </span>
+            <span className="font-bold text-ink">{formatCOP(totals.totalActual)}</span>
+          </p>
+        )}
+      </div>
+      {totals.perPerson.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {totals.perPerson.map((p) => (
+            <span key={p.name} className="rounded-full bg-white/80 px-3 py-1 text-xs font-semibold text-ink">
+              {p.name}: {formatCOP(p.share)}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function ActivitiesSection({
   planId,
   activities,
   participants,
+  budgetTotals,
   isAdmin,
   currentPersonId,
 }: {
   planId: string;
   activities: ActivityWithExtras[];
   participants: { id: string; full_name: string }[];
+  budgetTotals: ActivityBudgetTotals;
   isAdmin: boolean;
   currentPersonId: string;
 }) {
@@ -36,6 +76,8 @@ export function ActivitiesSection({
         </p>
       </CardHeader>
       <CardBody className="space-y-4">
+        <BudgetSummary totals={budgetTotals} />
+
         {approved.length === 0 && pending.length === 0 ? (
           <p className="rounded-2xl bg-surface-muted/70 px-4 py-6 text-center text-sm text-ink-soft">
             Aún no hay actividades registradas.
@@ -101,8 +143,12 @@ export function ActivitiesSection({
             <Input id="activityDate" name="activityDate" type="date" />
           </div>
           <div>
-            <Label htmlFor="estimatedCost">Costo estimado (COP)</Label>
+            <Label htmlFor="estimatedCost">Presupuesto aprox. (COP)</Label>
             <Input id="estimatedCost" name="estimatedCost" type="number" min="0" placeholder="0" />
+            <label className="mt-1.5 flex items-center gap-1.5 text-xs font-medium text-ink-soft">
+              <input type="checkbox" name="noBudget" className="h-3.5 w-3.5" />
+              Esta tarea no tiene costo
+            </label>
           </div>
           <div className="sm:col-span-2">
             <Label htmlFor="responsiblePersonId">Responsable (opcional)</Label>

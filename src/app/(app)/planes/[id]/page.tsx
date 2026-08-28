@@ -7,6 +7,7 @@ import { ActivitiesSection } from "@/components/plan/activities-section";
 import type { ActivityBudgetTotals } from "@/components/plan/activities-section";
 import { ExpensesSection } from "@/components/plan/expenses-section";
 import { ParticipantsSection } from "@/components/plan/participants-section";
+import { PlanMembers } from "@/components/plan/plan-members";
 import type {
   Activity,
   ActivityNote,
@@ -46,7 +47,7 @@ export default async function PlanDetailPage({
   ] = await Promise.all([
     supabase
       .from("sa_plan_participants")
-      .select("*, person:sa_people(id, full_name)")
+      .select("*, person:sa_people(id, full_name, status)")
       .eq("plan_id", id)
       .order("created_at", { ascending: true }),
     supabase
@@ -65,7 +66,7 @@ export default async function PlanDetailPage({
 
   const typedPlan = plan as Plan;
   const participants = (participantRows ?? []) as (PlanParticipant & {
-    person: Pick<Person, "id" | "full_name"> | null;
+    person: Pick<Person, "id" | "full_name" | "status"> | null;
   })[];
   const activities = (activityRows ?? []) as Activity[];
   const expenses = (expenseRows ?? []) as Expense[];
@@ -161,6 +162,8 @@ export default async function PlanDetailPage({
   return (
     <div className="space-y-6">
       <PlanHeader plan={typedPlan} isAdmin={isAdmin} />
+
+      <PlanMembers participants={participants} />
 
       <BalanceSummary
         tallies={tallies}

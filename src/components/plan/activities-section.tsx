@@ -8,6 +8,7 @@ import type { Activity, ActivityNote } from "@/lib/types";
 
 interface ActivityWithExtras extends Activity {
   responsible_name: string | null;
+  invited_name: string | null;
   notes: (ActivityNote & { person_name: string })[];
 }
 
@@ -160,6 +161,9 @@ export function ActivitiesSection({
                 </option>
               ))}
             </Select>
+            <p className="mt-1.5 text-xs text-ink-soft">
+              Si eliges a otra persona, le llega como invitación para aceptar (no queda asignada de una vez).
+            </p>
           </div>
           <div className="sm:col-span-2">
             <Button type="submit" size="sm">

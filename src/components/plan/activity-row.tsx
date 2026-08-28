@@ -9,10 +9,12 @@ import { Button } from "@/components/ui/button";
 import { ConfirmSubmit } from "@/components/ui/confirm-submit";
 import {
   approveActivity,
+  cancelActivityInvite,
   claimActivity,
   deleteActivity,
   deleteActivityNote,
   addActivityNote,
+  respondActivityInvite,
   setActivityActualCost,
   unassignActivity,
   updateActivity,
@@ -23,6 +25,7 @@ import type { Activity, ActivityNote } from "@/lib/types";
 
 interface ActivityWithExtras extends Activity {
   responsible_name: string | null;
+  invited_name: string | null;
   notes: (ActivityNote & { person_name: string })[];
 }
 
@@ -67,6 +70,32 @@ function ActionPill({
       {icon}
       {children}
     </button>
+  );
+}
+
+function InviteResponse({ activity, planId }: { activity: ActivityWithExtras; planId: string }) {
+  return (
+    <div className="rounded-xl bg-sun-50 p-3">
+      <p className="text-sm font-semibold text-sun-800">Te invitaron como responsable de esta actividad.</p>
+      <div className="mt-2 flex flex-wrap gap-2">
+        <form action={respondActivityInvite}>
+          <input type="hidden" name="activityId" value={activity.id} />
+          <input type="hidden" name="planId" value={planId} />
+          <input type="hidden" name="accept" value="true" />
+          <Button type="submit" size="sm">
+            Aceptar
+          </Button>
+        </form>
+        <form action={respondActivityInvite}>
+          <input type="hidden" name="activityId" value={activity.id} />
+          <input type="hidden" name="planId" value={planId} />
+          <input type="hidden" name="accept" value="false" />
+          <Button type="submit" size="sm" variant="outline">
+            Rechazar
+          </Button>
+        </form>
+      </div>
+    </div>
   );
 }
 
@@ -273,7 +302,11 @@ function EditForm({
       {isAdmin && (
         <div className="sm:col-span-2">
           <Label htmlFor={`responsible-${activity.id}`}>Responsable</Label>
-          <Select id={`responsible-${activity.id}`} name="responsiblePersonId" defaultValue={activity.responsible_person_id ?? ""}>
+          <Select
+            id={`responsible-${activity.id}`}
+            name="responsiblePersonId"
+            defaultValue={activity.responsible_person_id ?? activity.invited_person_id ?? ""}
+          >
             <option value="">Sin asignar</option>
             {participants.map((p) => (
               <option key={p.id} value={p.id}>
@@ -281,6 +314,9 @@ function EditForm({
               </option>
             ))}
           </Select>
+          <p className="mt-1.5 text-xs text-ink-soft">
+            Si eliges a otra persona, le llega como invitación para aceptar (no queda asignada de una vez).
+          </p>
         </div>
       )}
       <div className="flex gap-3 sm:col-span-2">
@@ -308,14 +344,15 @@ export function ActivityRow({
   isAdmin: boolean;
   currentPersonId: string;
 }) {
-  const [expanded, setExpanded] = useState(false);
+  const isInvitee = activity.invited_person_id === currentPersonId;
+  const [expanded, setExpanded] = useState(isInvitee);
   const [editing, setEditing] = useState(false);
 
   const isPending = activity.status === "pendiente";
   const isAssignee = activity.responsible_person_id === currentPersonId;
   const isOwnerOfUnassigned = !activity.responsible_person_id && activity.proposed_by === currentPersonId;
   const canManage = isAdmin || isAssignee || isOwnerOfUnassigned;
-  const canClaim = !activity.responsible_person_id;
+  const canClaim = !activity.responsible_person_id && !activity.invited_person_id;
   const money = moneyLabel(activity);
 
   return (
@@ -332,9 +369,13 @@ export function ActivityRow({
           <div className="flex flex-wrap items-center gap-1.5">
             <p className="truncate text-sm font-bold">{activity.name}</p>
             {isPending && <Badge tone="sun">Pendiente</Badge>}
+            {activity.invited_person_id && <Badge tone="sun">Por confirmar</Badge>}
           </div>
           <div className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-xs text-ink-soft">
-            <span>{activity.responsible_name ?? "Sin responsable"}</span>
+            <span>
+              {activity.responsible_name ??
+                (activity.invited_name ? `Invitado: ${activity.invited_name}` : "Sin responsable")}
+            </span>
             <span>·</span>
             <span className={money.tone}>{money.text}</span>
           </div>
@@ -372,8 +413,17 @@ export function ActivityRow({
                 <ActualCostSection activity={activity} planId={planId} isAssignee={isAssignee} isAdmin={isAdmin} />
               )}
 
+              {isInvitee && <InviteResponse activity={activity} planId={planId} />}
+
               <div className="flex flex-wrap items-center gap-1 border-t border-ink/5 pt-2">
                 {canClaim && <ClaimForm activity={activity} planId={planId} />}
+                {canManage && activity.invited_person_id && !isInvitee && (
+                  <form action={cancelActivityInvite}>
+                    <input type="hidden" name="activityId" value={activity.id} />
+                    <input type="hidden" name="planId" value={planId} />
+                    <ActionPill icon={<UserMinus size={14} />}>Cancelar invitación</ActionPill>
+                  </form>
+                )}
                 {isAdmin && activity.responsible_person_id && (
                   <form action={unassignActivity}>
                     <input type="hidden" name="activityId" value={activity.id} />

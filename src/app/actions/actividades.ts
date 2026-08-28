@@ -18,12 +18,17 @@ export async function proposeActivity(formData: FormData) {
 
   if (!planId || !name) return;
 
+  // Si elige a otra persona como responsable, queda como invitación
+  // pendiente: solo se auto-asigna de una vez si se elige a sí mismo.
+  const isSelf = responsiblePersonId === person.id;
+
   await supabase.from("sa_activities").insert({
     plan_id: planId,
     name,
     description,
     activity_date: activityDate,
-    responsible_person_id: responsiblePersonId || null,
+    responsible_person_id: isSelf ? person.id : null,
+    invited_person_id: responsiblePersonId && !isSelf ? responsiblePersonId : null,
     estimated_cost_cop: noBudget ? null : estimatedCost ? Number(estimatedCost) : null,
     no_budget: noBudget,
     proposed_by: person.id,
@@ -57,11 +62,28 @@ export async function updateActivity(formData: FormData) {
     no_budget: noBudget,
   };
 
-  // Solo el admin puede reasignar o quitar el responsable de una actividad;
-  // si alguien más edita, este campo no se toca.
+  // Solo el admin puede tocar la asignación desde el formulario de edición.
+  // Elegir a alguien más queda como invitación pendiente (no reemplaza a un
+  // responsable ya aceptado; para eso primero hay que "Quitar responsable").
   if (person.role === "admin") {
     const responsiblePersonId = (formData.get("responsiblePersonId") as string) || null;
-    update.responsible_person_id = responsiblePersonId || null;
+    const { data: current } = await supabase
+      .from("sa_activities")
+      .select("responsible_person_id")
+      .eq("id", activityId)
+      .maybeSingle();
+
+    if (!responsiblePersonId) {
+      update.responsible_person_id = null;
+      update.invited_person_id = null;
+    } else if (responsiblePersonId !== current?.responsible_person_id) {
+      if (responsiblePersonId === person.id) {
+        update.responsible_person_id = person.id;
+        update.invited_person_id = null;
+      } else if (!current?.responsible_person_id) {
+        update.invited_person_id = responsiblePersonId;
+      }
+    }
   }
 
   await supabase.from("sa_activities").update(update).eq("id", activityId);
@@ -123,6 +145,35 @@ export async function unassignActivity(formData: FormData) {
     target_activity_id: activityId,
     assign: false,
   });
+  revalidatePath(`/planes/${planId}`);
+}
+
+export async function respondActivityInvite(formData: FormData) {
+  await requirePerson();
+  const supabase = await createClient();
+
+  const activityId = formData.get("activityId") as string;
+  const planId = formData.get("planId") as string;
+  const accept = formData.get("accept") === "true";
+
+  await supabase.rpc("sa_respond_activity_invite", {
+    target_activity_id: activityId,
+    accept,
+  });
+  revalidatePath(`/planes/${planId}`);
+}
+
+export async function cancelActivityInvite(formData: FormData) {
+  // El admin, o quien propuso la actividad (sigue sin responsable mientras
+  // la invitación está pendiente), puede cancelarla — misma política de
+  // UPDATE que el resto de la edición.
+  await requirePerson();
+  const supabase = await createClient();
+
+  const activityId = formData.get("activityId") as string;
+  const planId = formData.get("planId") as string;
+
+  await supabase.from("sa_activities").update({ invited_person_id: null }).eq("id", activityId);
   revalidatePath(`/planes/${planId}`);
 }
 

@@ -128,6 +128,7 @@ export default async function PlanDetailPage({
   const activitiesWithResponsible = activities.map((a) => ({
     ...a,
     responsible_name: a.responsible_person_id ? nameById.get(a.responsible_person_id) ?? null : null,
+    invited_name: a.invited_person_id ? nameById.get(a.invited_person_id) ?? null : null,
     notes: notesByActivity.get(a.id) ?? [],
   }));
 

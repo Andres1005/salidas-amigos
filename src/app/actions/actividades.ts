@@ -62,16 +62,22 @@ export async function updateActivity(formData: FormData) {
     no_budget: noBudget,
   };
 
-  // Solo el admin puede tocar la asignación desde el formulario de edición.
-  // Elegir a alguien más queda como invitación pendiente (no reemplaza a un
-  // responsable ya aceptado; para eso primero hay que "Quitar responsable").
-  if (person.role === "admin") {
+  // El admin siempre puede tocar la asignación. Quien propuso la actividad
+  // también puede, pero solo mientras sigue sin responsable — una vez
+  // alguien acepta, ya solo el admin la puede reasignar (o "Quitar
+  // responsable"). Elegir a alguien más queda como invitación pendiente, no
+  // reemplaza de una vez a un responsable ya aceptado.
+  const { data: current } = await supabase
+    .from("sa_activities")
+    .select("responsible_person_id, proposed_by")
+    .eq("id", activityId)
+    .maybeSingle();
+
+  const canAssign =
+    person.role === "admin" || (!current?.responsible_person_id && current?.proposed_by === person.id);
+
+  if (canAssign) {
     const responsiblePersonId = (formData.get("responsiblePersonId") as string) || null;
-    const { data: current } = await supabase
-      .from("sa_activities")
-      .select("responsible_person_id")
-      .eq("id", activityId)
-      .maybeSingle();
 
     if (!responsiblePersonId) {
       update.responsible_person_id = null;

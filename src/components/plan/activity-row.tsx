@@ -247,13 +247,13 @@ function EditForm({
   activity,
   planId,
   participants,
-  isAdmin,
+  canAssign,
   onDone,
 }: {
   activity: ActivityWithExtras;
   planId: string;
   participants: { id: string; full_name: string }[];
-  isAdmin: boolean;
+  canAssign: boolean;
   onDone: () => void;
 }) {
   return (
@@ -298,7 +298,7 @@ function EditForm({
           Esta tarea no tiene costo
         </label>
       </div>
-      {isAdmin && (
+      {canAssign && (
         <div className="sm:col-span-2">
           <Label htmlFor={`responsible-${activity.id}`}>Responsable</Label>
           <Select
@@ -350,6 +350,7 @@ export function ActivityRow({
   const isAssignee = activity.responsible_person_id === currentPersonId;
   const isOwnerOfUnassigned = !activity.responsible_person_id && activity.proposed_by === currentPersonId;
   const canManage = isAdmin || isAssignee || isOwnerOfUnassigned;
+  const canAssign = isAdmin || isOwnerOfUnassigned;
   const canClaim = !activity.responsible_person_id && !activity.invited_person_id;
   const money = moneyLabel(activity);
 
@@ -396,7 +397,7 @@ export function ActivityRow({
               activity={activity}
               planId={planId}
               participants={participants}
-              isAdmin={isAdmin}
+              canAssign={canAssign}
               onDone={() => setEditing(false)}
             />
           ) : (

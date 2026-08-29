@@ -32,7 +32,7 @@ export async function proposeActivity(formData: FormData) {
     estimated_cost_cop: noBudget ? null : estimatedCost ? Number(estimatedCost) : null,
     no_budget: noBudget,
     proposed_by: person.id,
-    status: person.role === "admin" ? "aprobada" : "pendiente",
+    status: "aprobada",
   });
 
   revalidatePath(`/planes/${planId}`);
@@ -88,17 +88,6 @@ export async function updateActivity(formData: FormData) {
 
   await supabase.from("sa_activities").update(update).eq("id", activityId);
 
-  revalidatePath(`/planes/${planId}`);
-}
-
-export async function approveActivity(formData: FormData) {
-  await requireAdmin();
-  const supabase = await createClient();
-
-  const activityId = formData.get("activityId") as string;
-  const planId = formData.get("planId") as string;
-
-  await supabase.from("sa_activities").update({ status: "aprobada" }).eq("id", activityId);
   revalidatePath(`/planes/${planId}`);
 }
 

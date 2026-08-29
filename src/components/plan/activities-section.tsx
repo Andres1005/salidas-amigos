@@ -64,61 +64,34 @@ export function ActivitiesSection({
   isAdmin: boolean;
   currentPersonId: string;
 }) {
-  const approved = activities.filter((a) => a.status === "aprobada");
-  const pending = activities.filter((a) => a.status === "pendiente");
-
   return (
     <Card>
       <CardHeader>
         <h2 className="font-bold">Actividades</h2>
         <p className="text-sm text-ink-soft">
           El itinerario del plan, quién responde por cada cosa y las ideas de todos.
-          {!isAdmin && " Cualquiera puede proponer una actividad; el admin la aprueba."}
         </p>
       </CardHeader>
       <CardBody className="space-y-4">
         <BudgetSummary totals={budgetTotals} />
 
-        {approved.length === 0 && pending.length === 0 ? (
+        {activities.length === 0 ? (
           <p className="rounded-2xl bg-surface-muted/70 px-4 py-6 text-center text-sm text-ink-soft">
             Aún no hay actividades registradas.
           </p>
         ) : (
-          <>
-            {approved.length > 0 && (
-              <ul className="space-y-2">
-                {approved.map((activity) => (
-                  <ActivityRow
-                    key={activity.id}
-                    activity={activity}
-                    planId={planId}
-                    participants={participants}
-                    isAdmin={isAdmin}
-                    currentPersonId={currentPersonId}
-                  />
-                ))}
-              </ul>
-            )}
-            {pending.length > 0 && (
-              <div>
-                <p className="mb-2 text-xs font-bold uppercase tracking-wide text-ink-soft/70">
-                  Propuestas pendientes
-                </p>
-                <ul className="space-y-2">
-                  {pending.map((activity) => (
-                    <ActivityRow
-                      key={activity.id}
-                      activity={activity}
-                      planId={planId}
-                      participants={participants}
-                      isAdmin={isAdmin}
-                      currentPersonId={currentPersonId}
-                    />
-                  ))}
-                </ul>
-              </div>
-            )}
-          </>
+          <ul className="space-y-2">
+            {activities.map((activity) => (
+              <ActivityRow
+                key={activity.id}
+                activity={activity}
+                planId={planId}
+                participants={participants}
+                isAdmin={isAdmin}
+                currentPersonId={currentPersonId}
+              />
+            ))}
+          </ul>
         )}
 
         <form

@@ -23,7 +23,7 @@ const STEPS = [
     number: "4",
     title: "Proponen y registran",
     description:
-      "Cualquiera propone actividades y anota lo que pagó; el admin aprueba las actividades para que queden oficiales.",
+      "Cualquiera crea actividades y anota lo que pagó; se le puede asignar una tarea a alguien o dejarla libre para que cualquiera se apunte.",
   },
   {
     number: "5",

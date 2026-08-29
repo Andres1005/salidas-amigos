@@ -1,14 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, MessageCircle, Pencil, Trash2, UserMinus, UserPlus, Check } from "lucide-react";
+import { ChevronDown, MessageCircle, Pencil, Trash2, UserMinus, UserPlus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
 import { Input, Label, Select, Textarea } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 import { ConfirmSubmit } from "@/components/ui/confirm-submit";
 import {
-  approveActivity,
   cancelActivityInvite,
   claimActivity,
   deleteActivity,
@@ -348,7 +347,6 @@ export function ActivityRow({
   const [expanded, setExpanded] = useState(isInvitee);
   const [editing, setEditing] = useState(false);
 
-  const isPending = activity.status === "pendiente";
   const isAssignee = activity.responsible_person_id === currentPersonId;
   const isOwnerOfUnassigned = !activity.responsible_person_id && activity.proposed_by === currentPersonId;
   const canManage = isAdmin || isAssignee || isOwnerOfUnassigned;
@@ -368,7 +366,6 @@ export function ActivityRow({
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-1.5">
             <p className="truncate text-sm font-bold">{activity.name}</p>
-            {isPending && <Badge tone="sun">Pendiente</Badge>}
             {activity.invited_person_id && <Badge tone="sun">Por confirmar</Badge>}
           </div>
           <div className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-xs text-ink-soft">
@@ -429,15 +426,6 @@ export function ActivityRow({
                     <input type="hidden" name="activityId" value={activity.id} />
                     <input type="hidden" name="planId" value={planId} />
                     <ActionPill icon={<UserMinus size={14} />}>Quitar responsable</ActionPill>
-                  </form>
-                )}
-                {isAdmin && isPending && (
-                  <form action={approveActivity}>
-                    <input type="hidden" name="activityId" value={activity.id} />
-                    <input type="hidden" name="planId" value={planId} />
-                    <ActionPill icon={<Check size={14} />} tone="primary">
-                      Aprobar
-                    </ActionPill>
                   </form>
                 )}
                 {canManage && (

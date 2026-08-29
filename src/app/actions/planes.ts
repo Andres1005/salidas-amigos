@@ -153,6 +153,47 @@ export async function updateParticipantShare(formData: FormData) {
   revalidatePath(`/planes/${planId}`);
 }
 
+export async function addGuestParticipant(formData: FormData) {
+  // Invitados sin cuenta: alguien que va al plan, paga y hasta puede tener
+  // una actividad asignada, pero nunca va a registrarse en la app. Se crea
+  // como una fila normal de sa_people (con auth_user_id null y is_guest en
+  // true) para que reutilice todo lo que ya funciona con personas
+  // registradas: reparto, "quién pagó", responsable de actividades, etc.
+  await requireAdmin();
+  const supabase = await createClient();
+
+  const planId = formData.get("planId") as string;
+  const fullName = (formData.get("fullName") as string)?.trim();
+  const preset = (formData.get("preset") as string) || "normal";
+
+  if (!planId || !fullName) return;
+
+  const { roleLabel, shareWeight } = resolvePreset(preset);
+  const placeholderEmail = `invitado-${generateInviteCode(10).toLowerCase()}@sin-cuenta.salidas-amigos`;
+
+  const { data: guest, error } = await supabase
+    .from("sa_people")
+    .insert({
+      full_name: fullName,
+      email: placeholderEmail,
+      role: "member",
+      status: "aprobado",
+      invite_code: generateInviteCode(),
+      auth_user_id: null,
+      is_guest: true,
+    })
+    .select("id")
+    .single();
+
+  if (error || !guest) return;
+
+  await supabase
+    .from("sa_plan_participants")
+    .insert({ plan_id: planId, person_id: guest.id, share_weight: shareWeight, role_label: roleLabel });
+
+  revalidatePath(`/planes/${planId}`);
+}
+
 export async function removeParticipant(formData: FormData) {
   await requireAdmin();
   const supabase = await createClient();

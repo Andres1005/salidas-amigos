@@ -3,19 +3,20 @@ import { Card, CardHeader, CardBody } from "@/components/ui/card";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Select } from "@/components/ui/field";
+import { Input, Label, Select } from "@/components/ui/field";
 import { ConfirmSubmit } from "@/components/ui/confirm-submit";
 import { ParticipantPresetSelect } from "@/components/plan/participant-preset-select";
 import {
   updateParticipantShare,
   removeParticipant,
   addParticipant,
+  addGuestParticipant,
 } from "@/app/actions/planes";
-import { presetFor } from "@/lib/participant-presets";
+import { presetFor, PARTICIPANT_PRESETS } from "@/lib/participant-presets";
 import type { PlanParticipant, Person } from "@/lib/types";
 
 interface ParticipantWithPerson extends PlanParticipant {
-  person: Pick<Person, "id" | "full_name" | "status"> | null;
+  person: Pick<Person, "id" | "full_name" | "status" | "is_guest"> | null;
 }
 
 export function ParticipantsSection({
@@ -56,6 +57,7 @@ export function ParticipantsSection({
                 <Badge tone="sun">Por aprobar →</Badge>
               </Link>
             )}
+            {participant.person?.is_guest && <Badge tone="neutral">Sin cuenta</Badge>}
 
             <ParticipantPresetSelect
               defaultValue={presetFor(participant.role_label, Number(participant.share_weight))}
@@ -101,6 +103,40 @@ export function ParticipantsSection({
             </form>
           </div>
         )}
+
+        <div className="rounded-2xl border border-dashed border-ink/10 p-4">
+          <p className="text-xs font-bold uppercase tracking-wide text-ink-soft/70">
+            Invitado sin cuenta
+          </p>
+          <p className="mt-1 text-xs text-ink-soft">
+            Para alguien que va al plan (paga, puede tener una tarea asignada) pero que nunca va a
+            crear cuenta en la app.
+          </p>
+          <form action={addGuestParticipant} className="mt-3 flex flex-wrap items-end gap-3">
+            <input type="hidden" name="planId" value={planId} />
+            <div>
+              <Label htmlFor="guestFullName" className="text-xs">
+                Nombre
+              </Label>
+              <Input id="guestFullName" name="fullName" placeholder="Ej. Pareja de Julián" required className="h-10 w-48" />
+            </div>
+            <div>
+              <Label htmlFor="guestPreset" className="text-xs">
+                Reparto
+              </Label>
+              <Select id="guestPreset" name="preset" defaultValue="normal" className="h-10 w-auto">
+                {PARTICIPANT_PRESETS.map((preset) => (
+                  <option key={preset.value} value={preset.value}>
+                    {preset.label}
+                  </option>
+                ))}
+              </Select>
+            </div>
+            <Button type="submit" size="sm">
+              + Agregar invitado
+            </Button>
+          </form>
+        </div>
 
         <p className="text-xs text-ink-soft">
           ¿La persona que buscas no aparece en la lista de arriba? Comparte el código de este plan

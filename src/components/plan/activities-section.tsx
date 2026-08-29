@@ -59,7 +59,7 @@ export function ActivitiesSection({
 }: {
   planId: string;
   activities: ActivityWithExtras[];
-  participants: { id: string; full_name: string }[];
+  participants: { id: string; full_name: string; is_guest: boolean }[];
   budgetTotals: ActivityBudgetTotals;
   isAdmin: boolean;
   currentPersonId: string;
@@ -131,11 +131,13 @@ export function ActivitiesSection({
               {participants.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.full_name}
+                  {p.is_guest ? " (sin cuenta)" : ""}
                 </option>
               ))}
             </Select>
             <p className="mt-1.5 text-xs text-ink-soft">
-              Si eliges a otra persona, le llega como invitación para aceptar (no queda asignada de una vez).
+              Si eliges a otra persona con cuenta, le llega como invitación para aceptar. Si eliges a alguien
+              sin cuenta, queda asignada de una vez.
             </p>
           </div>
           <div className="sm:col-span-2">

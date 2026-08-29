@@ -43,13 +43,14 @@ export function PersonaRow({ person }: { person: Person }) {
         <Avatar name={person.full_name} />
         <div>
           <p className="font-bold">{person.full_name}</p>
-          <p className="text-sm text-ink-soft">{person.email}</p>
+          {!person.is_guest && <p className="text-sm text-ink-soft">{person.email}</p>}
         </div>
         {person.role === "admin" && <Badge tone="sun">Admin</Badge>}
+        {person.is_guest && <Badge tone="neutral">Sin cuenta</Badge>}
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        {person.status === "pendiente" && (
+        {!person.is_guest && person.status === "pendiente" && (
           <>
             <Badge tone="sun">Pendiente de aprobación</Badge>
             <Button type="button" size="sm" disabled={isPending} onClick={handleApprove}>
@@ -68,7 +69,7 @@ export function PersonaRow({ person }: { person: Person }) {
           </>
         )}
 
-        {person.status === "aprobado" && <Badge tone="primary">✓ Activo</Badge>}
+        {!person.is_guest && person.status === "aprobado" && <Badge tone="primary">✓ Activo</Badge>}
 
         {person.status === "rechazado" && (
           <>

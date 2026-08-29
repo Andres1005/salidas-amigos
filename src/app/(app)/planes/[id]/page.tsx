@@ -47,7 +47,7 @@ export default async function PlanDetailPage({
   ] = await Promise.all([
     supabase
       .from("sa_plan_participants")
-      .select("*, person:sa_people(id, full_name, status)")
+      .select("*, person:sa_people(id, full_name, status, is_guest)")
       .eq("plan_id", id)
       .order("created_at", { ascending: true }),
     supabase
@@ -66,7 +66,7 @@ export default async function PlanDetailPage({
 
   const typedPlan = plan as Plan;
   const participants = (participantRows ?? []) as (PlanParticipant & {
-    person: Pick<Person, "id" | "full_name" | "status"> | null;
+    person: Pick<Person, "id" | "full_name" | "status" | "is_guest"> | null;
   })[];
   const activities = (activityRows ?? []) as Activity[];
   const expenses = (expenseRows ?? []) as Expense[];
@@ -90,6 +90,7 @@ export default async function PlanDetailPage({
   const participantOptions = participants.map((p) => ({
     id: p.person_id,
     full_name: p.person?.full_name ?? "Alguien",
+    is_guest: p.person?.is_guest ?? false,
   }));
   const availablePeople = people.filter(
     (p) => !participants.some((pp) => pp.person_id === p.id)

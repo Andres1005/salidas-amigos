@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import type { PlanParticipant, Person } from "@/lib/types";
 
 interface ParticipantWithPerson extends PlanParticipant {
-  person: Pick<Person, "id" | "full_name" | "status"> | null;
+  person: Pick<Person, "id" | "full_name" | "status" | "is_guest"> | null;
 }
 
 export function PlanMembers({ participants }: { participants: ParticipantWithPerson[] }) {
@@ -30,6 +30,7 @@ export function PlanMembers({ participants }: { participants: ParticipantWithPer
                   <span className="text-sm font-semibold text-ink">{name}</span>
                   {status === "pendiente" && <Badge tone="sun">Por aprobar</Badge>}
                   {status === "rechazado" && <Badge tone="coral">Rechazada</Badge>}
+                  {p.person?.is_guest && <Badge tone="neutral">Sin cuenta</Badge>}
                   {p.role_label && <Badge tone="sun">{p.role_label}</Badge>}
                 </li>
               );

@@ -18,17 +18,28 @@ export async function proposeActivity(formData: FormData) {
 
   if (!planId || !name) return;
 
-  // Si elige a otra persona como responsable, queda como invitación
-  // pendiente: solo se auto-asigna de una vez si se elige a sí mismo.
+  // Si elige a otra persona con cuenta, queda como invitación pendiente.
+  // Si se elige a sí mismo, o a alguien sin cuenta (invitado que nunca va a
+  // poder entrar a aceptar), queda asignada de una vez.
   const isSelf = responsiblePersonId === person.id;
+  let isGuestTarget = false;
+  if (responsiblePersonId && !isSelf) {
+    const { data: target } = await supabase
+      .from("sa_people")
+      .select("is_guest")
+      .eq("id", responsiblePersonId)
+      .maybeSingle();
+    isGuestTarget = !!target?.is_guest;
+  }
+  const immediate = isSelf || isGuestTarget;
 
   await supabase.from("sa_activities").insert({
     plan_id: planId,
     name,
     description,
     activity_date: activityDate,
-    responsible_person_id: isSelf ? person.id : null,
-    invited_person_id: responsiblePersonId && !isSelf ? responsiblePersonId : null,
+    responsible_person_id: immediate ? responsiblePersonId : null,
+    invited_person_id: !immediate && responsiblePersonId ? responsiblePersonId : null,
     estimated_cost_cop: noBudget ? null : estimatedCost ? Number(estimatedCost) : null,
     no_budget: noBudget,
     proposed_by: person.id,
@@ -83,8 +94,18 @@ export async function updateActivity(formData: FormData) {
       update.responsible_person_id = null;
       update.invited_person_id = null;
     } else if (responsiblePersonId !== current?.responsible_person_id) {
-      if (responsiblePersonId === person.id) {
-        update.responsible_person_id = person.id;
+      let isGuestTarget = false;
+      if (responsiblePersonId !== person.id) {
+        const { data: target } = await supabase
+          .from("sa_people")
+          .select("is_guest")
+          .eq("id", responsiblePersonId)
+          .maybeSingle();
+        isGuestTarget = !!target?.is_guest;
+      }
+
+      if (responsiblePersonId === person.id || isGuestTarget) {
+        update.responsible_person_id = responsiblePersonId;
         update.invited_person_id = null;
       } else if (!current?.responsible_person_id) {
         update.invited_person_id = responsiblePersonId;

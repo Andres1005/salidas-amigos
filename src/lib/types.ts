@@ -19,6 +19,7 @@ export interface Person {
   role: PersonRole;
   status: ApprovalStatus;
   auth_user_id: string | null;
+  is_guest: boolean;
   created_at: string;
 }
 

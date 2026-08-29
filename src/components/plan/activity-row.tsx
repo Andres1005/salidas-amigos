@@ -252,7 +252,7 @@ function EditForm({
 }: {
   activity: ActivityWithExtras;
   planId: string;
-  participants: { id: string; full_name: string }[];
+  participants: { id: string; full_name: string; is_guest: boolean }[];
   canAssign: boolean;
   onDone: () => void;
 }) {
@@ -310,11 +310,13 @@ function EditForm({
             {participants.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.full_name}
+                {p.is_guest ? " (sin cuenta)" : ""}
               </option>
             ))}
           </Select>
           <p className="mt-1.5 text-xs text-ink-soft">
-            Si eliges a otra persona, le llega como invitación para aceptar (no queda asignada de una vez).
+            Si eliges a otra persona con cuenta, le llega como invitación para aceptar. Si eliges a alguien
+            sin cuenta, queda asignada de una vez.
           </p>
         </div>
       )}
@@ -339,7 +341,7 @@ export function ActivityRow({
 }: {
   activity: ActivityWithExtras;
   planId: string;
-  participants: { id: string; full_name: string }[];
+  participants: { id: string; full_name: string; is_guest: boolean }[];
   isAdmin: boolean;
   currentPersonId: string;
 }) {

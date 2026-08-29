@@ -15,9 +15,11 @@ export default async function PersonasPage() {
     .order("created_at", { ascending: true });
 
   const typedPeople = (people ?? []) as Person[];
-  const pending = typedPeople.filter((p) => p.status === "pendiente");
-  const approved = typedPeople.filter((p) => p.status === "aprobado");
-  const rejected = typedPeople.filter((p) => p.status === "rechazado");
+  const accounts = typedPeople.filter((p) => !p.is_guest);
+  const guests = typedPeople.filter((p) => p.is_guest);
+  const pending = accounts.filter((p) => p.status === "pendiente");
+  const approved = accounts.filter((p) => p.status === "aprobado");
+  const rejected = accounts.filter((p) => p.status === "rechazado");
 
   return (
     <div>
@@ -64,6 +66,22 @@ export default async function PersonasPage() {
           <h2 className="font-bold text-ink-soft">Rechazadas</h2>
           <div className="mt-4 space-y-3">
             {rejected.map((person) => (
+              <PersonaRow key={person.id} person={person} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {guests.length > 0 && (
+        <div className="mt-8">
+          <h2 className="font-bold">
+            {guests.length} {guests.length === 1 ? "invitado sin cuenta" : "invitados sin cuenta"}
+          </h2>
+          <p className="mt-1 text-sm text-ink-soft">
+            Personas agregadas directamente a un plan sin que se registren en la app.
+          </p>
+          <div className="mt-4 space-y-3">
+            {guests.map((person) => (
               <PersonaRow key={person.id} person={person} />
             ))}
           </div>
